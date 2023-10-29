@@ -1,12 +1,13 @@
 import datetime
 from time import sleep
+from typing import List
 
 import requests
 
 from settings import URL
 
 
-def check_feeds(data: dict):
+def check_feeds(data: List[dict]):
     pass
 
 
