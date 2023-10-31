@@ -4,24 +4,35 @@ from typing import List
 
 import requests
 
-from settings import URL
+from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR
 
 
 def get_incoming_document(doc_id: str, headers):
-    document_url = URL+doc_id
-    incomming_document_request = requests.get(url=document_url, headers=headers)
-    if incomming_document_request.status_code != 200:
+    document_url = URL + doc_id
+    incoming_document_request = requests.get(url=document_url, headers=headers)
+    if incoming_document_request.status_code != 200:
         raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
-                        f'{incomming_document_request.status_code}')
-    incomming_document_json = incomming_document_request.json()
-    pass
+                        f'{incoming_document_request.status_code}')
+    incoming_document_json = incoming_document_request.json()
+    if SEARCH_DEBTOR in incoming_document_json.get('detail').get(
+            'addParams').get('DbtrName'):
+        file_id = incoming_document_json.get('detail').get('messages')[0].get('attachments')[1].get('attachmentId')
+        file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
+        file_request = requests.get(url=file_link, headers=headers)
+        if file_request.status_code == 200:
+            with open(f'downloads/{file_id}.pdf', 'wb') as f:
+                f.write(file_request.content)
+                print('File saved')
+        else:
+            raise Exception(
+                f'Ошибка при загрузке файла, ответ сервера {file_request.status_code}')
 
 
 def check_feeds(data: List[dict], headers: dict):
     for element in data:
         sender_name = element.get('title')
         document_name = element.get('subTitle')
-        if sender_name.lower() == 'фссп россии' and 'постановление' in document_name.lower():
+        if sender_name.lower() == SEARCH_SENDER and SEARCH_WORD in document_name.lower():
             feed_id = str(element.get('id'))
             get_incoming_document(feed_id, headers)
 

@@ -11,3 +11,9 @@ URL = 'https://www.gosuslugi.ru/api/lk/v1/feeds/'
 # входящие уведомления, для фильтра уведомлений от ФССП используется значение
 # переменной GEPS
 TYPE_FEED = 'GEPS'
+
+SEARCH_SENDER = 'фссп россии'
+
+SEARCH_WORD = 'постановление'
+
+SEARCH_DEBTOR = 'Климов Артём Владимирович'
