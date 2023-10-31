@@ -4,7 +4,15 @@ from typing import List
 
 import requests
 
-from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR
+from email_utils import send_ticket_to_user
+from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
+    EMAIL_TARGET
+
+
+def save_downloaded_pdf(file, file_id):
+    with open(f'downloads/{file_id}.pdf', 'wb') as file_pdf:
+        file_pdf.write(file)
+        print('File saved')
 
 
 def get_incoming_document(doc_id: str, headers):
@@ -16,13 +24,13 @@ def get_incoming_document(doc_id: str, headers):
     incoming_document_json = incoming_document_request.json()
     if SEARCH_DEBTOR in incoming_document_json.get('detail').get(
             'addParams').get('DbtrName'):
-        file_id = incoming_document_json.get('detail').get('messages')[0].get('attachments')[1].get('attachmentId')
+        file_id = incoming_document_json.get('detail').get('messages')[0].get(
+            'attachments')[1].get('attachmentId')
         file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
         file_request = requests.get(url=file_link, headers=headers)
         if file_request.status_code == 200:
-            with open(f'downloads/{file_id}.pdf', 'wb') as f:
-                f.write(file_request.content)
-                print('File saved')
+            save_downloaded_pdf(file_request.content, file_id)
+            send_ticket_to_user(file_request.content, EMAIL_TARGET)
         else:
             raise Exception(
                 f'Ошибка при загрузке файла, ответ сервера {file_request.status_code}')
