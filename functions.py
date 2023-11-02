@@ -6,7 +6,7 @@ import requests
 
 from email_utils import send_ticket_to_user
 from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
-    EMAIL_TARGET
+    EMAIL_TARGET, SEND_EMAIL
 
 
 def save_downloaded_pdf(file, file_id):
@@ -25,12 +25,13 @@ def get_incoming_document(doc_id: str, headers):
     if SEARCH_DEBTOR in incoming_document_json.get('detail').get(
             'addParams').get('DbtrName'):
         file_id = incoming_document_json.get('detail').get('messages')[0].get(
-            'attachments')[1].get('attachmentId')
+            'attachments')[0].get('attachmentId') # TODO Проверить json
         file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
         file_request = requests.get(url=file_link, headers=headers)
         if file_request.status_code == 200:
             save_downloaded_pdf(file_request.content, file_id)
-            send_ticket_to_user(file_request.content, EMAIL_TARGET)
+            if SEND_EMAIL:
+                send_ticket_to_user(file_request.content, EMAIL_TARGET)
         else:
             raise Exception(
                 f'Ошибка при загрузке файла, ответ сервера {file_request.status_code}')
@@ -55,7 +56,7 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
 
     feed_request = requests.get(url=url, headers=headers)
     if feed_request.status_code != 200:
-        raise Exception('Код не 200')
+        raise Exception(f'При попытке загрузить новости получен код {feed_request.status_code}')
     feeds = feed_request.json().get('items')
     for i in feeds:
         print(i)

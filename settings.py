@@ -21,13 +21,15 @@ TYPE_FEED = 'GEPS'
 SEARCH_SENDER = 'фссп россии'
 
 # Используется для поиска слова в названии уведомления
-SEARCH_WORD = 'постановление'
+SEARCH_WORD = 'возбужден'
 
 # Используется для поиска конкретного должника в уведомлениях от ФССП
-SEARCH_DEBTOR = 'Климов Артём Владимирович'
+SEARCH_DEBTOR = ' '
 
 APP_EMAIL = os.getenv('APP_EMAIL')
 
 APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 
 EMAIL_TARGET = os.getenv('EMAIL_TARGET')
+
+SEND_EMAIL = False
