@@ -6,7 +6,7 @@ import requests
 
 from email_utils import send_ticket_to_user
 from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
-    EMAIL_TARGET, SEND_EMAIL
+    EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS
 
 
 def save_downloaded_pdf(file, file_id):
@@ -54,7 +54,7 @@ def check_feeds(data: List[dict], headers: dict):
 
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
-              type_feed='', request_count=0) -> None:
+              type_feed='', request_count=0, result=[]) -> list:
     headers = {
         'Cookie': cookie
     }
@@ -62,10 +62,10 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     url = url_feed + f'?types={type_feed}&lastFeedDate={last_feed_date}'
 
     feed_request = requests.get(url=url, headers=headers)
-    if feed_request.status_code == 504 and request_count < 15:
+    if feed_request.status_code == 504 and request_count < RE_REQUESTS:
         request_count += 1
         sleep(20)
-        print(f'Try {request_count + 1}')
+        print(f'Try to request feeds # {request_count + 1}')
         get_feeds(url_feed=url_feed, cookie=cookie,
                   date_end_check=date_end_check, last_feed_date=last_feed_date,
                   type_feed=type_feed, request_count=request_count)
@@ -73,16 +73,15 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         raise Exception(
             f'При попытке загрузить новости получен код {feed_request.status_code}')
     feeds = feed_request.json().get('items')
-    for i in feeds:
-        print(i)
-    check_feeds(feeds, headers)
+    result.extend(feeds)
     last_feed_in_json = feeds.pop().get('date')
     more_feeds = feed_request.json().get('hasMore')
     if more_feeds and last_feed_in_json > date_end_check:  # TODO Попробовать поменять на ID ПОследней новости
         last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
         sleep(3)
         get_feeds(url_feed=URL, cookie=cookie, date_end_check=date_end_check,
-                  last_feed_date=last_feed_in_json)
+                  last_feed_date=last_feed_in_json, result=result)
+    return result
 
 
 def get_cookie() -> str:

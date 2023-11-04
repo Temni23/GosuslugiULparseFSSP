@@ -26,6 +26,8 @@ SEARCH_WORD = ' '
 # Используется для поиска конкретного должника в уведомлениях от ФССП
 SEARCH_DEBTOR = ' '
 
+RE_REQUESTS = 15
+
 APP_EMAIL = os.getenv('APP_EMAIL')
 
 APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
