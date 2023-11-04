@@ -22,11 +22,13 @@ def get_incoming_document(doc_id: str, headers):
         raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
                         f'{incoming_document_request.status_code}')
     incoming_document_json = incoming_document_request.json()
-    if SEARCH_DEBTOR in incoming_document_json.get('detail').get(
-            'addParams').get('DbtrName'):
+    debtor_name = incoming_document_json.get('detail').get(
+        'addParams').get('DbtrName')
+    if debtor_name and SEARCH_DEBTOR in debtor_name:
         # file_id = incoming_document_json.get('detail').get('messages')[0].get(
         #     'attachments')[0].get('attachmentId') # TODO Проверить json
-        attachments = incoming_document_json.get('detail').get('messages')[0].get(
+        attachments = incoming_document_json.get('detail').get('messages')[
+            0].get(
             'attachments')
         for attachment in attachments:
             if 'pdf' in attachment.get('fileName'):
@@ -63,18 +65,20 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     if feed_request.status_code == 504 and request_count < 15:
         request_count += 1
         sleep(20)
-        print(f'Try {request_count+1}')
-        get_feeds(url_feed=url_feed, cookie=cookie, date_end_check=date_end_check, last_feed_date=last_feed_date,
-              type_feed=type_feed, request_count=request_count)
+        print(f'Try {request_count + 1}')
+        get_feeds(url_feed=url_feed, cookie=cookie,
+                  date_end_check=date_end_check, last_feed_date=last_feed_date,
+                  type_feed=type_feed, request_count=request_count)
     elif feed_request.status_code != 200:
-        raise Exception(f'При попытке загрузить новости получен код {feed_request.status_code}')
+        raise Exception(
+            f'При попытке загрузить новости получен код {feed_request.status_code}')
     feeds = feed_request.json().get('items')
     for i in feeds:
         print(i)
     check_feeds(feeds, headers)
     last_feed_in_json = feeds.pop().get('date')
     more_feeds = feed_request.json().get('hasMore')
-    if more_feeds and last_feed_in_json > date_end_check: # TODO Попробовать поменять на ID ПОследней новости
+    if more_feeds and last_feed_in_json > date_end_check:  # TODO Попробовать поменять на ID ПОследней новости
         last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
         sleep(3)
         get_feeds(url_feed=URL, cookie=cookie, date_end_check=date_end_check,
