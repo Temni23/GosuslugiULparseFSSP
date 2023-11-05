@@ -11,12 +11,14 @@ from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
 
 def save_downloaded_pdf(file, file_id):
     with open(f'downloads/{file_id}.pdf', 'wb') as file_pdf:
+        # TODO Добавить в путь дату
         file_pdf.write(file)
-        print('File saved')
+        print(f'File {file_id} saved successful')
 
 
 def get_incoming_document(doc_id: str, headers):
     document_url = URL + doc_id
+    sleep(2)
     incoming_document_request = requests.get(url=document_url, headers=headers)
     if incoming_document_request.status_code != 200:
         raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
@@ -33,24 +35,31 @@ def get_incoming_document(doc_id: str, headers):
         for attachment in attachments:
             if 'pdf' in attachment.get('fileName'):
                 file_id = attachment.get('attachmentId')
-        file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
-        file_request = requests.get(url=file_link, headers=headers)
-        if file_request.status_code == 200:
-            save_downloaded_pdf(file_request.content, file_id)
-            if SEND_EMAIL:
-                send_ticket_to_user(file_request.content, EMAIL_TARGET)
-        else:
-            raise Exception(
-                f'Ошибка при загрузке файла, ответ сервера {file_request.status_code}')
+                file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
+                file_request = requests.get(url=file_link, headers=headers)
+                if file_request.status_code == 200:
+                    save_downloaded_pdf(file_request.content, file_id)
+                    if SEND_EMAIL:
+                        send_ticket_to_user(file_request.content, EMAIL_TARGET)
+                else:
+                    print(
+                        f'Ошибка при загрузке файла id {file_id}, ответ сервера '
+                        f'{file_request.status_code}') # TODO Добавить
+                    # повторный вызов
+                    reuse = input('Попробовать еще раз? (Да/Нет)')
+                    if reuse.lower() == 'да':
+                        get_incoming_document(doc_id=doc_id, headers=headers)
 
 
 def check_feeds(data: List[dict], headers: dict):
     for element in data:
         sender_name = element.get('title')
         document_name = element.get('subTitle')
-        if sender_name.lower() == SEARCH_SENDER and SEARCH_WORD in document_name.lower():
+        if (sender_name.lower() == SEARCH_SENDER
+                and SEARCH_WORD in document_name.lower()):
             feed_id = str(element.get('id'))
             get_incoming_document(feed_id, headers)
+            # TODO Возвращать список с айдишками
 
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
@@ -71,12 +80,18 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
                   type_feed=type_feed, request_count=request_count)
     elif feed_request.status_code != 200:
         raise Exception(
-            f'При попытке загрузить новости получен код {feed_request.status_code}')
-    feeds = feed_request.json().get('items')
+            f'При попытке загрузить новости получен код '
+            f'{feed_request.status_code}')
+    try:
+        feeds = feed_request.json().get('items')
+    except Exception as e:
+        print(feed_request, feed_request.status_code, feed_request.text)
+        raise Exception(f'Ошибка при получении новостей {e}')
     result.extend(feeds)
+    print(f'Работаю, собрано {len(result)} новостей')
     last_feed_in_json = feeds.pop().get('date')
     more_feeds = feed_request.json().get('hasMore')
-    if more_feeds and last_feed_in_json > date_end_check:  # TODO Попробовать поменять на ID ПОследней новости
+    if more_feeds and last_feed_in_json > date_end_check:
         last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
         sleep(3)
         get_feeds(url_feed=URL, cookie=cookie, date_end_check=date_end_check,

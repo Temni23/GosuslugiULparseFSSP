@@ -7,7 +7,8 @@ if __name__ == '__main__':
         int(input('Введите период для проверки: ')))
     feeds = get_feeds(URL, type_feed=TYPE_FEED, cookie=cookie,
                       date_end_check=end_date)
-    print('Новости получены, проверяю...')
+    print(f'Новости получены, проверяю... Всего '
+          f'{len(feeds)} новостей для проверки.')
     headers = {'Cookie': cookie}
     check_feeds(data=feeds, headers=headers)
     print('Проверено')
