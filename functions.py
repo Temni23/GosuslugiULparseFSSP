@@ -10,13 +10,15 @@ from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
 
 
 def save_downloaded_pdf(file, file_id):
+    """Сохраняет PDF файл в выбранную папку"""
     with open(f'downloads/{file_id}.pdf', 'wb') as file_pdf:
         # TODO Добавить в путь дату
         file_pdf.write(file)
         print(f'File {file_id} saved successful')
 
 
-def download_pdf(attachments, headers, request_count=1):
+def download_pdf(attachments: list, headers: dict, request_count=1):
+    """Скачивает PDF файл"""
     for attachment in attachments:
         if 'pdf' in attachment.get('fileName'):
             file_id = attachment.get('attachmentId')
@@ -39,7 +41,9 @@ def download_pdf(attachments, headers, request_count=1):
                     f'{file_request.status_code}. Перехожу к другому файлу.')
 
 
-def get_incoming_document(docs_id: list, headers: dict):
+def get_incoming_document(docs_id: list, headers: dict) -> None:
+    """Получает входящие документы из списка id. Проверяет по заданным
+    словам, вызывает функцию для загрузки PDF, если поиск успешен."""
     for doc_id in docs_id:
         document_url = URL + doc_id
         sleep(2)
@@ -59,6 +63,8 @@ def get_incoming_document(docs_id: list, headers: dict):
 
 
 def check_feeds(data: List[dict]) -> list:
+    """Проверяет входящие уведомления по заданным параметрам. Возвращает
+    список id документов, для которых проверка дала положительный результат"""
     target_feeds_id = []
     for element in data:
         sender_name = element.get('title')
@@ -72,6 +78,8 @@ def check_feeds(data: List[dict]) -> list:
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
               type_feed='', request_count=0, result=[]) -> list:
+    """Получает входящие уведомления, список словарей, сформированных из
+    json входящих уведомлений."""
     headers = {
         'Cookie': cookie
     }
@@ -113,6 +121,8 @@ def get_cookie() -> str:
 
 
 def get_date_with_offset(delta):
+    """Возвращает дату в формате необходимом для установки в качестве
+    параметра url запроса."""
     current_date = datetime.datetime.now()
     gap = datetime.timedelta(days=delta)
     offset_date = current_date - gap
