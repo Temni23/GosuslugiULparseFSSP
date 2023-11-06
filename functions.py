@@ -91,7 +91,7 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     url = url_feed + f'?types={type_feed}&lastFeedDate={last_feed_date}'
 
     feed_request = requests.get(url=url, headers=headers)
-    if feed_request.status_code == 504 and request_count < RE_REQUESTS:
+    if feed_request.status_code != 200 and request_count < RE_REQUESTS:
         request_count += 1
         sleep(20)
         print(f'Try to request feeds # {request_count + 1}')
@@ -102,12 +102,9 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         raise Exception(
             f'При попытке загрузить новости получен код '
             f'{feed_request.status_code}')
-    # try:
+
     if feed_request.status_code == 200:
         feeds = feed_request.json().get('items')
-    # except Exception as e:
-    #     print(feed_request, feed_request.status_code, feed_request.text)
-    #     raise Exception(f'Ошибка при получении новостей {e}')
         result.extend(feeds)
         print(f'Работаю, собрано {len(result)} новостей')
         last_feed_in_json = feeds.pop().get('date')
