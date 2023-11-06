@@ -16,50 +16,58 @@ def save_downloaded_pdf(file, file_id):
         print(f'File {file_id} saved successful')
 
 
-def get_incoming_document(doc_id: str, headers):
-    document_url = URL + doc_id
-    sleep(2)
-    incoming_document_request = requests.get(url=document_url, headers=headers)
-    if incoming_document_request.status_code != 200:
-        raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
-                        f'{incoming_document_request.status_code}')
-    incoming_document_json = incoming_document_request.json()
-    debtor_name = incoming_document_json.get('detail').get(
-        'addParams').get('DbtrName')
-    if debtor_name and SEARCH_DEBTOR in debtor_name:
-        # file_id = incoming_document_json.get('detail').get('messages')[0].get(
-        #     'attachments')[0].get('attachmentId') # TODO Проверить json
-        attachments = incoming_document_json.get('detail').get('messages')[
-            0].get(
-            'attachments')
-        for attachment in attachments:
-            if 'pdf' in attachment.get('fileName'):
-                file_id = attachment.get('attachmentId')
-                file_link = f'https://www.gosuslugi.ru/api/lk/geps/file/download/{file_id}?inline=false'
-                file_request = requests.get(url=file_link, headers=headers)
-                if file_request.status_code == 200:
-                    save_downloaded_pdf(file_request.content, file_id)
-                    if SEND_EMAIL:
-                        send_ticket_to_user(file_request.content, EMAIL_TARGET)
-                else:
-                    print(
-                        f'Ошибка при загрузке файла id {file_id}, ответ сервера '
-                        f'{file_request.status_code}') # TODO Добавить
-                    # повторный вызов
-                    reuse = input('Попробовать еще раз? (Да/Нет)')
-                    if reuse.lower() == 'да':
-                        get_incoming_document(doc_id=doc_id, headers=headers)
+def download_pdf(attachments, headers, request_count=1):
+    for attachment in attachments:
+        if 'pdf' in attachment.get('fileName'):
+            file_id = attachment.get('attachmentId')
+            file_link = (f'https://www.gosuslugi.ru/api/lk/geps/file'
+                         f'/download/{file_id}?inline=false')
+            file_request = requests.get(url=file_link, headers=headers)
+            if file_request.status_code == 200:
+                save_downloaded_pdf(file_request.content, file_id)
+                if SEND_EMAIL:
+                    send_ticket_to_user(file_request.content, EMAIL_TARGET)
+            elif request_count < 5:
+                request_count += 1
+                print(
+                    f'Ошибка при загрузке файла id {file_id}, ответ сервера '
+                    f'{file_request.status_code}. Пробую {request_count} раз')
+                download_pdf(attachments, headers, request_count=request_count)
+            else:
+                print(
+                    f'Ошибка при загрузке файла id {file_id}, ответ сервера '
+                    f'{file_request.status_code}. Перехожу к другому файлу.')
 
 
-def check_feeds(data: List[dict], headers: dict):
+def get_incoming_document(docs_id: list, headers: dict):
+    for doc_id in docs_id:
+        document_url = URL + doc_id
+        sleep(2)
+        incoming_document_request = requests.get(url=document_url,
+                                                 headers=headers)
+        if incoming_document_request.status_code != 200:
+            raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
+                            f'{incoming_document_request.status_code}')
+        incoming_document_json = incoming_document_request.json()
+        debtor_name = incoming_document_json.get('detail').get(
+            'addParams').get('DbtrName')
+        if debtor_name and SEARCH_DEBTOR in debtor_name:
+            attachments = incoming_document_json.get('detail').get('messages')[
+                0].get(
+                'attachments')
+            download_pdf(attachments, headers)
+
+
+def check_feeds(data: List[dict]) -> list:
+    target_feeds_id = []
     for element in data:
         sender_name = element.get('title')
         document_name = element.get('subTitle')
         if (sender_name.lower() == SEARCH_SENDER
                 and SEARCH_WORD in document_name.lower()):
             feed_id = str(element.get('id'))
-            get_incoming_document(feed_id, headers)
-            # TODO Возвращать список с айдишками
+            target_feeds_id.append(feed_id)
+    return target_feeds_id
 
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
