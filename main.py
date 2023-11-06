@@ -18,4 +18,4 @@ if __name__ == '__main__':
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
         get_incoming_document(targets_feeds, headers)
         print('Загрузка закончена')
-    print(f'Проверка до {end_date} закончена.')
+    print(f'Проверка до {end_date[0:10]} закончена.')

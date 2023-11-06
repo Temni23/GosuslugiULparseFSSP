@@ -1,4 +1,5 @@
 import datetime
+import os.path
 from time import sleep
 from typing import List
 
@@ -11,10 +12,13 @@ from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
 
 def save_downloaded_pdf(file, file_id):
     """Сохраняет PDF файл в выбранную папку"""
-    with open(f'downloads/{file_id}.pdf', 'wb') as file_pdf:
-        # TODO Добавить в путь дату
+    today = str(datetime.date.today())
+    folder_path = f'downloads/check{today}'
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    with open(f'{folder_path}/{file_id}.pdf', 'wb') as file_pdf:
         file_pdf.write(file)
-        print(f'File {file_id} saved successful')
+        print(f'File {file_id} saved successfully')
 
 
 def download_pdf(attachments: list, headers: dict, request_count=1):
@@ -98,20 +102,24 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         raise Exception(
             f'При попытке загрузить новости получен код '
             f'{feed_request.status_code}')
-    try:
+    # try:
+    if feed_request.status_code == 200:
         feeds = feed_request.json().get('items')
-    except Exception as e:
-        print(feed_request, feed_request.status_code, feed_request.text)
-        raise Exception(f'Ошибка при получении новостей {e}')
-    result.extend(feeds)
-    print(f'Работаю, собрано {len(result)} новостей')
-    last_feed_in_json = feeds.pop().get('date')
-    more_feeds = feed_request.json().get('hasMore')
-    if more_feeds and last_feed_in_json > date_end_check:
-        last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
-        sleep(3)
-        get_feeds(url_feed=URL, cookie=cookie, date_end_check=date_end_check,
-                  last_feed_date=last_feed_in_json, result=result)
+    # except Exception as e:
+    #     print(feed_request, feed_request.status_code, feed_request.text)
+    #     raise Exception(f'Ошибка при получении новостей {e}')
+        result.extend(feeds)
+        print(f'Работаю, собрано {len(result)} новостей')
+        last_feed_in_json = feeds.pop().get('date')
+        more_feeds = feed_request.json().get('hasMore')
+        if more_feeds and last_feed_in_json > date_end_check:
+            last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
+            sleep(3)
+            get_feeds(url_feed=URL, cookie=cookie,
+                      date_end_check=date_end_check,
+                      last_feed_date=last_feed_in_json, result=result)
+    else:
+        pass
     return result
 
 
