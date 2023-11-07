@@ -7,7 +7,7 @@ import requests
 
 from email_utils import send_ticket_to_user
 from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
-    EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS
+    EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS, REQUEST_SLEEP_TIME
 
 
 def save_downloaded_pdf(file, file_id):
@@ -93,7 +93,7 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     feed_request = requests.get(url=url, headers=headers)
     if feed_request.status_code != 200 and request_count < RE_REQUESTS:
         request_count += 1
-        sleep(20)
+        sleep(REQUEST_SLEEP_TIME)
         print(f'Try to request feeds # {request_count + 1}')
         get_feeds(url_feed=url_feed, cookie=cookie,
                   date_end_check=date_end_check, last_feed_date=last_feed_date,
