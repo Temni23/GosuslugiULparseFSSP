@@ -5,9 +5,10 @@ from typing import List
 
 import requests
 
-from email_utils import send_ticket_to_user
-from settings import URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR, \
-    EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS, REQUEST_SLEEP_TIME
+from email_utils import send_vip_to_user
+from settings import (URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR,
+                      EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS,
+                      REQUEST_SLEEP_TIME)
 
 
 def save_downloaded_pdf(file, file_id):
@@ -32,7 +33,7 @@ def download_pdf(attachments: list, headers: dict, request_count=1):
             if file_request.status_code == 200:
                 save_downloaded_pdf(file_request.content, file_id)
                 if SEND_EMAIL:
-                    send_ticket_to_user(file_request.content, EMAIL_TARGET)
+                    send_vip_to_user(file_request.content, EMAIL_TARGET)
             elif request_count < 5:
                 request_count += 1
                 print(
@@ -45,9 +46,10 @@ def download_pdf(attachments: list, headers: dict, request_count=1):
                     f'{file_request.status_code}. Перехожу к другому файлу.')
 
 
-def get_incoming_document(docs_id: list, headers: dict) -> None:
+def get_incoming_document(docs_id: list, headers: dict) -> List:
     """Получает входящие документы из списка id. Проверяет по заданным
     словам, вызывает функцию для загрузки PDF, если поиск успешен."""
+    result = []
     for doc_id in docs_id:
         document_url = URL + doc_id
         sleep(2)
@@ -57,13 +59,18 @@ def get_incoming_document(docs_id: list, headers: dict) -> None:
             raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
                             f'{incoming_document_request.status_code}')
         incoming_document_json = incoming_document_request.json()
+        result.append(incoming_document_json)
+        print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
         debtor_name = incoming_document_json.get('detail').get(
             'addParams').get('DbtrName')
-        if debtor_name and SEARCH_DEBTOR in debtor_name:
-            attachments = incoming_document_json.get('detail').get('messages')[
-                0].get(
-                'attachments')
-            download_pdf(attachments, headers)
+        # if debtor_name and 'росттех' in debtor_name:
+        #     attachments = incoming_document_json.get('detail').get('messages')[
+        #         0].get(
+        #         'attachments')
+        #     pdf = download_pdf(attachments, headers)
+        #     send_vip_to_user(pdf, )
+        # TODO Перекрутить в проверку
+    return result
 
 
 def check_feeds(data: List[dict]) -> list:
@@ -81,14 +88,16 @@ def check_feeds(data: List[dict]) -> list:
 
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
-              type_feed='', request_count=0, result=[]) -> list:
+              type_feed='', last_feed_id='',
+              request_count=0, result=[]) -> list:
     """Получает входящие уведомления, список словарей, сформированных из
     json входящих уведомлений."""
     headers = {
         'Cookie': cookie
     }
 
-    url = url_feed + f'?types={type_feed}&lastFeedDate={last_feed_date}'
+    url = url_feed + (f'?types={type_feed}&pageSize=15&lastFeedId={last_feed_id}'
+                      f'&lastFeedDate={last_feed_date}')
 
     feed_request = requests.get(url=url, headers=headers)
     if feed_request.status_code != 200 and request_count < RE_REQUESTS:
@@ -97,7 +106,8 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         print(f'Try to request feeds # {request_count + 1}')
         get_feeds(url_feed=url_feed, cookie=cookie,
                   date_end_check=date_end_check, last_feed_date=last_feed_date,
-                  type_feed=type_feed, request_count=request_count)
+                  type_feed=type_feed, request_count=request_count,
+                  last_feed_id=last_feed_id)
     elif feed_request.status_code != 200:
         raise Exception(
             f'При попытке загрузить новости получен код '
@@ -105,16 +115,23 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
 
     if feed_request.status_code == 200:
         feeds = feed_request.json().get('items')
+        for _ in feeds:
+            print(_)
         result.extend(feeds)
         print(f'Работаю, собрано {len(result)} новостей')
-        last_feed_in_json = feeds.pop().get('date')
+        last_feed = feeds.pop()
+        last_feed_in_json = last_feed.get('date')
         more_feeds = feed_request.json().get('hasMore')
+        last_feed_id = last_feed.get('id')
+        print(last_feed_id)
+        print(last_feed_in_json)
         if more_feeds and last_feed_in_json > date_end_check:
             last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
             sleep(3)
             get_feeds(url_feed=URL, cookie=cookie,
                       date_end_check=date_end_check,
-                      last_feed_date=last_feed_in_json, result=result)
+                      last_feed_date=last_feed_in_json,
+                      last_feed_id=last_feed_id, result=result)
     else:
         pass
     return result
@@ -135,3 +152,5 @@ def get_date_with_offset(delta):
                                          microsecond=0)
 
     return formatted_date.strftime('%Y-%m-%dT%H:%M:%S.000') + '%2B0300'
+
+

@@ -1,6 +1,8 @@
+from excel_utils import save_incoming_vip_to_excel
 from functions import get_feeds, get_cookie, get_date_with_offset, check_feeds, \
     get_incoming_document
 from settings import URL, TYPE_FEED
+
 
 if __name__ == '__main__':
     cookie = get_cookie()
@@ -16,6 +18,11 @@ if __name__ == '__main__':
     if targets_feeds:
         print(f'Найдены уведомления по заданным параметрам, '
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
-        get_incoming_document(targets_feeds, headers)
+        incoming_docs = get_incoming_document(targets_feeds, headers)
+        for i in incoming_docs:
+            print(i)
+        save_incoming_vip_to_excel(incoming_docs, 'excel/base.xlsx')
         print('Загрузка закончена')
     print(f'Проверка до {end_date[0:10]} закончена.')
+    last = feeds.pop()
+    print(f'Last feed {last}')
