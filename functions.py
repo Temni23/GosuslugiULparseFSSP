@@ -96,7 +96,7 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         'Cookie': cookie
     }
 
-    url = url_feed + (f'?types={type_feed}&pageSize=&lastFeedId={last_feed_id}'
+    url = url_feed + (f'?unread=false&isArchive=false&isHide=false&types={type_feed}&pageSize=&lastFeedId={last_feed_id}'
                       f'&lastFeedDate={last_feed_date}')
 
     feed_request = requests.get(url=url, headers=headers)

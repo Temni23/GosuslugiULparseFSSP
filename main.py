@@ -19,8 +19,6 @@ if __name__ == '__main__':
         print(f'Найдены уведомления по заданным параметрам, '
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
         incoming_docs = get_incoming_document(targets_feeds, headers)
-        for i in incoming_docs:
-            print(i)
         save_incoming_vip_to_excel(incoming_docs, 'excel/base.xlsx')
         print('Загрузка закончена')
     print(f'Проверка до {end_date[0:10]} закончена.')
