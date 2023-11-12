@@ -3,8 +3,9 @@ from typing import List
 
 import requests
 
-from settings import (URL, SEARCH_SENDER, SEARCH_WORD, RE_REQUESTS,
-                      REQUEST_SLEEP_TIME)
+from download_file_utils import download_pdf
+from settings import (URL, SEARCH_SENDER, SEARCH_WORD, RE_REQUESTS_SERVER,
+                      REQUEST_SLEEP_TIME, TRIGGER_TO_EMAIL)
 
 
 def get_incoming_document(docs_id: list, headers: dict) -> List:
@@ -14,8 +15,8 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
     for doc_id in docs_id:
         document_url = URL + doc_id
         sleep(2)
-        incoming_document_request = requests.get(url=document_url,
-                                                 headers=headers)
+        incoming_document_request = request_to_server(url=document_url,
+                                                      headers=headers)
         if incoming_document_request.status_code != 200:
             raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
                             f'{incoming_document_request.status_code}')
@@ -24,13 +25,12 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
         print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
         debtor_name = incoming_document_json.get('detail').get(
             'addParams').get('DbtrName')
-        # if debtor_name and 'росттех' in debtor_name:
-        #     attachments = incoming_document_json.get('detail').get('messages')[
-        #         0].get(
-        #         'attachments')
-        #     pdf = download_pdf(attachments, headers)
-        #     send_vip_to_user(pdf, )
-        # TODO Перекрутить в проверку
+        if debtor_name and TRIGGER_TO_EMAIL in debtor_name:
+            attachments = incoming_document_json.get('detail').get('messages')[
+                0].get(
+                'attachments')
+            download_pdf(attachments, headers)
+
     return result
 
 
@@ -57,22 +57,11 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
         'Cookie': cookie
     }
 
-    url = url_feed + (f'?unread=false&isArchive=false&isHide=false&types={type_feed}&pageSize=&lastFeedId={last_feed_id}'
-                      f'&lastFeedDate={last_feed_date}')
+    url = url_feed + (
+        f'?unread=false&isArchive=false&isHide=false&types={type_feed}&pageSize=&lastFeedId={last_feed_id}'
+        f'&lastFeedDate={last_feed_date}')
 
-    feed_request = requests.get(url=url, headers=headers)
-    if feed_request.status_code != 200 and request_count < RE_REQUESTS:
-        request_count += 1
-        sleep(REQUEST_SLEEP_TIME)
-        print(f'Try to request feeds # {request_count + 1}')
-        get_feeds(url_feed=url_feed, cookie=cookie,
-                  date_end_check=date_end_check, last_feed_date=last_feed_date,
-                  type_feed=type_feed, request_count=request_count,
-                  last_feed_id=last_feed_id)
-    elif feed_request.status_code != 200:
-        raise Exception(
-            f'При попытке загрузить новости получен код '
-            f'{feed_request.status_code}')
+    feed_request = request_to_server(url, headers)
 
     if feed_request.status_code == 200:
         feeds = feed_request.json().get('items')
@@ -96,3 +85,20 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     else:
         pass
     return result
+
+
+def request_to_server(url: str, headers: dict, request_count: int = 1):
+    response = requests.get(url=url, headers=headers)
+    if response.status_code != 200 and request_count < RE_REQUESTS_SERVER:
+        request_count += 1
+        sleep(REQUEST_SLEEP_TIME)
+        print(f'Try to request feeds # {request_count + 1}')
+        request_to_server(url=url, headers=headers,
+                          request_count=request_count)
+    elif response.status_code != 200:
+        raise Exception(f'При попытке получить информацию с сервера код '
+                        f'{response.status_code}')
+    if response.status_code == 200:
+        return response
+    else:
+        pass

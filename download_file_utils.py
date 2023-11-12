@@ -4,7 +4,7 @@ import os.path
 import requests
 
 from email_utils import send_vip_to_user
-from settings import SEND_EMAIL, EMAIL_TARGET
+from settings import SEND_EMAIL, EMAIL_TARGET, RE_REQUESTS_DOWNLOAD
 
 
 def save_downloaded_pdf(file, file_id):
@@ -30,7 +30,7 @@ def download_pdf(attachments: list, headers: dict, request_count=1):
                 save_downloaded_pdf(file_request.content, file_id)
                 if SEND_EMAIL:
                     send_vip_to_user(file_request.content, EMAIL_TARGET)
-            elif request_count < 5:
+            elif request_count < RE_REQUESTS_DOWNLOAD:
                 request_count += 1
                 print(
                     f'Ошибка при загрузке файла id {file_id}, ответ сервера '
@@ -39,4 +39,5 @@ def download_pdf(attachments: list, headers: dict, request_count=1):
             else:
                 print(
                     f'Ошибка при загрузке файла id {file_id}, ответ сервера '
-                    f'{file_request.status_code}. Перехожу к другому файлу.')
+                    f'{file_request.status_code}. Все попытки были '
+                    f'неудачными.')
