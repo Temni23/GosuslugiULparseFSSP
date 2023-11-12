@@ -25,7 +25,7 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
         print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
         debtor_name = incoming_document_json.get('detail').get(
             'addParams').get('DbtrName')
-        if debtor_name and TRIGGER_TO_EMAIL in debtor_name:
+        if debtor_name and TRIGGER_TO_EMAIL in debtor_name.lower():
             attachments = incoming_document_json.get('detail').get('messages')[
                 0].get(
                 'attachments')
@@ -49,8 +49,7 @@ def check_feeds(data: List[dict]) -> list:
 
 
 def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
-              type_feed='', last_feed_id='',
-              request_count=0, result=[]) -> list:
+              type_feed='', last_feed_id='', result=[]) -> list:
     """Получает входящие уведомления, список словарей, сформированных из
     json входящих уведомлений."""
     headers = {
@@ -58,45 +57,46 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     }
 
     url = url_feed + (
-        f'?unread=false&isArchive=false&isHide=false&types={type_feed}&pageSize=&lastFeedId={last_feed_id}'
+        f'?unread=false&isArchive=false&isHide=false&types='
+        f'{type_feed}&pageSize=20&lastFeedId={last_feed_id}'
         f'&lastFeedDate={last_feed_date}')
 
     feed_request = request_to_server(url, headers)
 
-    if feed_request.status_code == 200:
-        feeds = feed_request.json().get('items')
-        result.extend(feeds)
-        print(f'Работаю, собрано {len(result)} новостей')
-        last_feed = feeds.pop()
-        last_feed_in_json = last_feed.get('date')
-        more_feeds = feed_request.json().get('hasMore')
-        last_feed_id = last_feed.get('id')
-        print(last_feed_id)
-        print(last_feed_in_json)
-        if more_feeds and last_feed_in_json > date_end_check:
-            last_feed_in_json = last_feed_in_json[:-5] + '%2B0300'
-            sleep(3)
-            get_feeds(url_feed=URL, cookie=cookie,
-                      date_end_check=date_end_check,
-                      last_feed_date=last_feed_in_json,
-                      last_feed_id=last_feed_id, result=result)
-    else:
-        pass
+    feeds = feed_request.json().get('items')
+    result.extend(feeds)
+    print(f'Работаю, собрано {len(result)} новостей')
+    more_feeds = feed_request.json().get('hasMore')
+    last_feed = feeds.pop()
+    last_feed_date = last_feed.get('date')
+    last_feed_id = last_feed.get('id')
+    if more_feeds and last_feed_date > date_end_check:
+        last_feed_in_json = last_feed_date[:-5] + '%2B0300'
+        sleep(3)
+        get_feeds(url_feed=URL, cookie=cookie,
+                  date_end_check=date_end_check,
+                  last_feed_date=last_feed_in_json,
+                  last_feed_id=last_feed_id, result=result,
+                  type_feed=type_feed)
+
     return result
 
 
 def request_to_server(url: str, headers: dict, request_count: int = 1):
-    response = requests.get(url=url, headers=headers)
-    if response.status_code != 200 and request_count < RE_REQUESTS_SERVER:
-        request_count += 1
+    response = None
+    for retry in range(RE_REQUESTS_SERVER):
+        try:
+            response = requests.get(url=url, headers=headers)
+            if response.status_code == 200:
+                return response
+        except (requests.exceptions.RequestException, ConnectionError) as e:
+            print(f'Error during request to server: {e}')
         sleep(REQUEST_SLEEP_TIME)
-        print(f'Try to request feeds # {request_count + 1}')
-        request_to_server(url=url, headers=headers,
-                          request_count=request_count)
-    elif response.status_code != 200:
-        raise Exception(f'При попытке получить информацию с сервера код '
-                        f'{response.status_code}')
-    if response.status_code == 200:
-        return response
+        print(f'Retry request attempt #{retry + 1}')
+
+    if response is not None:
+        raise Exception(
+            f'Failed to retrieve information from the server. '
+            f'Last status code: {response.status_code}')
     else:
-        pass
+        print('All retry attempts failed. No response received.')
