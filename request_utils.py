@@ -65,8 +65,6 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
 
     if feed_request.status_code == 200:
         feeds = feed_request.json().get('items')
-        for _ in feeds:
-            print(_)
         result.extend(feeds)
         print(f'Работаю, собрано {len(result)} новостей')
         last_feed = feeds.pop()
