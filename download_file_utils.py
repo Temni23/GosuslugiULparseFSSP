@@ -1,6 +1,11 @@
 import datetime
 import os.path
 
+import requests
+
+from email_utils import send_vip_to_user
+from settings import SEND_EMAIL, EMAIL_TARGET
+
 
 def save_downloaded_pdf(file, file_id):
     """Сохраняет PDF файл в выбранную папку"""
