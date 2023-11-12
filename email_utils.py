@@ -7,8 +7,8 @@ from email.mime.text import MIMEText
 from settings import APP_EMAIL, APP_EMAIL_PASSWORD
 
 
-def send_vip_to_user(file:bytes, recipient_email:str) -> None:
-    """Функция используется для отправки емэйла с файлом пользователю."""
+def send_vip_to_user(file: bytes, recipient_email: str) -> None:
+    """Функция используется для отправки письма с файлом пользователю."""
     email = APP_EMAIL
     password = APP_EMAIL_PASSWORD
     target_email = recipient_email

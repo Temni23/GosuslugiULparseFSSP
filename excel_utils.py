@@ -1,7 +1,10 @@
+from typing import List
+
 import pandas as pd
 
 
-def save_incoming_vip_to_excel(data_list, excel_filename):
+def save_incoming_vip_to_excel(data_list: List[dict],
+                               excel_filename: str) -> None:
     # Пытаемся загрузить существующий файл Excel, если он существует
     try:
         existing_data = pd.read_excel(excel_filename)
@@ -37,22 +40,22 @@ def save_incoming_vip_to_excel(data_list, excel_filename):
 
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
-            'id': [id_],
-            'doc_reg_date': [doc_reg_date],
-            'dbtr_name': [dbtr_name],
-            'idoc_subj_exec_name': [idoc_subj_exec_name],
-            'number_doc': [number_doc],
-            'subj_num_push': [subj_num_push],
-            'crdr_name': [crdr_name],
-            'supplier_org_name': [supplier_org_name],
-            'debt_sum_total': [debt_sum_total],
-            'id_date': [id_date],
-            'id_organ_name': [id_organ_name],
-            'delo_num': [delo_num],
+            'Идентификатор': [id_],
+            'Дата регистрации документа': [doc_reg_date],
+            'Должник': [dbtr_name],
+            'Взыскатель': [crdr_name],
+            'Сумма долга': [debt_sum_total],
+            'Номер ИД': [number_doc],
+            'Дата ИД': [id_date],
+            'Суд': [id_organ_name],
+            'ОСП': [supplier_org_name],
+            'Номер ИП': [delo_num],
+            'Пристав': [spi_short_name],
+            'Дата возбуждения': [date_doc],
+            'Тип задолженности': [idoc_subj_exec_name],
+            'Уведомление': [subj_num_push],
             'subj_num_text': [subj_num_text],
             'subj_num_feed': [subj_num_feed],
-            'spi_short_name': [spi_short_name],
-            'date_doc': [date_doc]
         })
 
         # Объединяем временный DataFrame с основным

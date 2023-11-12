@@ -1,49 +1,10 @@
-import datetime
-import os.path
 from time import sleep
 from typing import List
 
 import requests
 
-from email_utils import send_vip_to_user
-from settings import (URL, SEARCH_SENDER, SEARCH_WORD, SEARCH_DEBTOR,
-                      EMAIL_TARGET, SEND_EMAIL, RE_REQUESTS,
+from settings import (URL, SEARCH_SENDER, SEARCH_WORD, RE_REQUESTS,
                       REQUEST_SLEEP_TIME)
-
-
-def save_downloaded_pdf(file, file_id):
-    """Сохраняет PDF файл в выбранную папку"""
-    today = str(datetime.date.today())
-    folder_path = f'downloads/check{today}'
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    with open(f'{folder_path}/{file_id}.pdf', 'wb') as file_pdf:
-        file_pdf.write(file)
-        print(f'File {file_id} saved successfully')
-
-
-def download_pdf(attachments: list, headers: dict, request_count=1):
-    """Скачивает PDF файл"""
-    for attachment in attachments:
-        if 'pdf' in attachment.get('fileName'):
-            file_id = attachment.get('attachmentId')
-            file_link = (f'https://www.gosuslugi.ru/api/lk/geps/file'
-                         f'/download/{file_id}?inline=false')
-            file_request = requests.get(url=file_link, headers=headers)
-            if file_request.status_code == 200:
-                save_downloaded_pdf(file_request.content, file_id)
-                if SEND_EMAIL:
-                    send_vip_to_user(file_request.content, EMAIL_TARGET)
-            elif request_count < 5:
-                request_count += 1
-                print(
-                    f'Ошибка при загрузке файла id {file_id}, ответ сервера '
-                    f'{file_request.status_code}. Пробую {request_count} раз')
-                download_pdf(attachments, headers, request_count=request_count)
-            else:
-                print(
-                    f'Ошибка при загрузке файла id {file_id}, ответ сервера '
-                    f'{file_request.status_code}. Перехожу к другому файлу.')
 
 
 def get_incoming_document(docs_id: list, headers: dict) -> List:
@@ -135,22 +96,3 @@ def get_feeds(url_feed, cookie, date_end_check, last_feed_date='',
     else:
         pass
     return result
-
-
-def get_cookie() -> str:
-    cookie = input('Введите значение Cookie: ')
-    return cookie
-
-
-def get_date_with_offset(delta):
-    """Возвращает дату в формате необходимом для установки в качестве
-    параметра url запроса."""
-    current_date = datetime.datetime.now()
-    gap = datetime.timedelta(days=delta)
-    offset_date = current_date - gap
-    formatted_date = offset_date.replace(hour=0, minute=0, second=0,
-                                         microsecond=0)
-
-    return formatted_date.strftime('%Y-%m-%dT%H:%M:%S.000') + '%2B0300'
-
-

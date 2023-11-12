@@ -1,6 +1,6 @@
 from excel_utils import save_incoming_vip_to_excel
-from functions import get_feeds, get_cookie, get_date_with_offset, check_feeds, \
-    get_incoming_document
+from request_utils import get_feeds, check_feeds, get_incoming_document
+from getters import get_cookie, get_date_with_offset
 from settings import URL, TYPE_FEED
 
 
