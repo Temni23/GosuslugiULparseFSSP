@@ -17,12 +17,11 @@ def save_incoming_vip_to_excel(data_list: List[dict],
 
     for item in data_list:
         # Извлекаем нужные значения из словаря item
-        id_ = item.get('id')
         doc_reg_date = item.get('detail').get('addParams').get('DocRegDate')
         dbtr_name = item.get('detail').get('addParams').get('DbtrName')
         idoc_subj_exec_name = item.get('detail').get('addParams').get(
             'IDocSubjExecName')
-        number_doc = item.get('detail').get('addParams').get('NumberDoc')
+        number_doc = item.get('detail').get('addParams').get('IDNum')
         subj_num_push = item.get('detail').get('addParams').get('SubjNum_push')
         crdr_name = item.get('detail').get('addParams').get('CrdrName')
         supplier_org_name = item.get('detail').get('addParams').get(
@@ -40,7 +39,6 @@ def save_incoming_vip_to_excel(data_list: List[dict],
 
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
-            'Идентификатор': [id_],
             'Дата регистрации документа': [doc_reg_date],
             'Должник': [dbtr_name],
             'Взыскатель': [crdr_name],
