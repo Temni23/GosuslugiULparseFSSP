@@ -6,6 +6,8 @@ downloads/
 # C extensions
 *.so
 note.py
+excel/
+testing.py
 
 # Distribution / packaging
 .Python

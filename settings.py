@@ -21,10 +21,13 @@ TYPE_FEED = 'GEPS'
 SEARCH_SENDER = 'фссп россии'
 
 # Используется для поиска слова в названии уведомления
-SEARCH_WORD = ' '
+SEARCH_WORD = 'возбужден'
 
 # Используется для поиска конкретного должника в уведомлениях от ФССП
 SEARCH_DEBTOR = ' '
+
+RE_REQUESTS_SERVER = 10
+RE_REQUESTS_DOWNLOAD = 5
 
 APP_EMAIL = os.getenv('APP_EMAIL')
 
@@ -32,4 +35,8 @@ APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 
 EMAIL_TARGET = os.getenv('EMAIL_TARGET')
 
-SEND_EMAIL = False
+SEND_EMAIL = True
+
+TRIGGER_TO_EMAIL = 'росттех'
+
+REQUEST_SLEEP_TIME = 5

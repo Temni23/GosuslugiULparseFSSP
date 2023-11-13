@@ -1,14 +1,13 @@
 import smtplib
-
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from settings import APP_EMAIL, APP_EMAIL_PASSWORD
+from settings import APP_EMAIL, APP_EMAIL_PASSWORD, TRIGGER_TO_EMAIL
 
 
-def send_ticket_to_user(file:bytes, recipient_email:str) -> None:
-    """Функция используется для отправки емэйла с файлом пользователю."""
+def send_vip_to_user(file: bytes, recipient_email: str) -> None:
+    """Функция используется для отправки письма с файлом пользователю."""
     email = APP_EMAIL
     password = APP_EMAIL_PASSWORD
     target_email = recipient_email
@@ -17,7 +16,9 @@ def send_ticket_to_user(file:bytes, recipient_email:str) -> None:
     msg['From'] = email
     msg['To'] = target_email
     msg['Subject'] = f'Поступило новое постановление от ФССП'
-    text_for_email = 'Выявлено новое постановление от ФССП'
+    text_for_email = (f'Выявлено новое постановление о возбуждении '
+                      f'исполнительного производства в отношении '
+                      f'{TRIGGER_TO_EMAIL.upper()}, постановление во вложении')
     msg.attach(MIMEText(text_for_email, 'html'))
 
     # Добавление вложения в письмо
@@ -36,5 +37,6 @@ def send_ticket_to_user(file:bytes, recipient_email:str) -> None:
         mailserver.sendmail(email, target_email, msg.as_string())
 
         mailserver.quit()
+        print(f'Письмо успешно отправлено')
     except smtplib.SMTPException as e:
         print(f'Ошибка: Невозможно отправить сообщение - {str(e)}')
