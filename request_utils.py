@@ -23,13 +23,13 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
         incoming_document_json = incoming_document_request.json()
         result.append(incoming_document_json)
         print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
-        debtor_name = incoming_document_json.get('detail').get(
-            'addParams').get('DbtrName')
-        if debtor_name and TRIGGER_TO_EMAIL in debtor_name.lower():
-            attachments = incoming_document_json.get('detail').get('messages')[
-                0].get(
-                'attachments')
-            download_pdf(attachments, headers)
+        # debtor_name = incoming_document_json.get('detail').get(
+        #     'addParams').get('DbtrName')
+        # if debtor_name and TRIGGER_TO_EMAIL in debtor_name.lower():
+        #     attachments = incoming_document_json.get('detail').get('messages')[
+        #         0].get(
+        #         'attachments')
+        #     download_pdf(attachments, headers)
 
     return result
 
@@ -41,8 +41,7 @@ def check_feeds(data: List[dict]) -> list:
     for element in data:
         sender_name = element.get('title')
         document_name = element.get('subTitle')
-        if (sender_name.lower() == SEARCH_SENDER
-                and SEARCH_WORD in document_name.lower()):
+        if sender_name.lower() == SEARCH_SENDER:
             feed_id = str(element.get('id'))
             target_feeds_id.append(feed_id)
     return target_feeds_id
