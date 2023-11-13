@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+downloads/
 # C extensions
 *.so
+note.py
+excel/
+testing.py
 
 # Distribution / packaging
 .Python
