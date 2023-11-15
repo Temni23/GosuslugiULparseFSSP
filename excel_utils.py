@@ -47,7 +47,6 @@ def save_incoming_vip_to_excel(data_list: List[dict],
                                                 delo_num)
             send_email_to_user(EMAIL_TARGET, text_for_email)
 
-
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
             'Дата регистрации документа': [doc_reg_date],
