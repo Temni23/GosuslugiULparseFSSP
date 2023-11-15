@@ -26,7 +26,7 @@ SEARCH_WORD = 'возбужден'
 # Используется для поиска конкретного должника в уведомлениях от ФССП
 SEARCH_DEBTOR = ' '
 
-RE_REQUESTS_SERVER = 10
+RE_REQUESTS_SERVER = 20
 RE_REQUESTS_DOWNLOAD = 5
 
 APP_EMAIL = os.getenv('APP_EMAIL')
