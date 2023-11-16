@@ -2,6 +2,9 @@ from typing import List
 
 import pandas as pd
 
+from email_utils import get_text_for_email, send_email_to_user
+from settings import TRIGGER_TO_EMAIL, EMAIL_TARGET
+
 
 def save_incoming_vip_to_excel(data_list: List[dict],
                                excel_filename: str) -> None:
@@ -37,6 +40,13 @@ def save_incoming_vip_to_excel(data_list: List[dict],
                           get('addParams').get('SPIShortName'))
         date_doc = item.get('detail').get('addParams').get('DateDoc')
 
+        if dbtr_name and TRIGGER_TO_EMAIL.lower() in dbtr_name.lower():
+            text_for_email = get_text_for_email(dbtr_name, supplier_org_name,
+                                                number_doc,
+                                                id_organ_name, id_date,
+                                                delo_num)
+            send_email_to_user(EMAIL_TARGET, text_for_email)
+
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
             'Дата регистрации документа': [doc_reg_date],
@@ -52,8 +62,8 @@ def save_incoming_vip_to_excel(data_list: List[dict],
             'Дата возбуждения': [date_doc],
             'Тип задолженности': [idoc_subj_exec_name],
             'Уведомление': [subj_num_push],
-            'subj_num_text': [subj_num_text],
-            'subj_num_feed': [subj_num_feed],
+            'Текст 1': [subj_num_text],
+            'Текст 2': [subj_num_feed],
         })
 
         # Объединяем временный DataFrame с основным
