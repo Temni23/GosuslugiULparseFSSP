@@ -1,9 +1,10 @@
 from time import sleep
 from typing import List
+import random
 
 import requests
 
-from settings import (URL, SEARCH_SENDER,  RE_REQUESTS_SERVER,
+from settings import (URL, SEARCH_SENDER, RE_REQUESTS_SERVER,
                       REQUEST_SLEEP_TIME)
 
 
@@ -13,7 +14,7 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
     result = []
     for doc_id in docs_id:
         document_url = URL + doc_id
-        sleep(2)
+        sleep(random.uniform(0,2))
         incoming_document_request = request_to_server(url=document_url,
                                                       headers=headers)
         if incoming_document_request.status_code != 200:
@@ -60,7 +61,7 @@ def get_feeds(url_feed: str, headers: dict, date_end_check: str,
     last_feed_id = last_feed.get('id')
     if more_feeds and last_feed_date > date_end_check:
         last_feed_in_json = last_feed_date[:-5] + '%2B0300'
-        sleep(3)
+        sleep(random.uniform(0,2))
         get_feeds(url_feed=URL, headers=headers,
                   date_end_check=date_end_check,
                   last_feed_date=last_feed_in_json,
