@@ -1,6 +1,7 @@
 from excel_utils import save_incoming_vip_to_excel
 from request_utils import get_feeds, check_feeds, get_incoming_document
-from getters import get_cookie, get_date_with_offset, get_last_params
+from getters import get_cookie, get_date_with_offset, get_last_params, \
+    get_last_feed_data
 from settings import URL, TYPE_FEED
 
 
@@ -24,4 +25,7 @@ if __name__ == '__main__':
         print('Загрузка закончена')
     print(f'Проверка до {end_date[0:10]} закончена.')
     last = feeds.pop()
-    print(f'Last feed {last}')
+    last_feed_date, last_feed_id = get_last_feed_data(last)
+    print(f'Данные для продолжения проверки:\n'
+          f'Дата последней новости: {last_feed_date}'
+          f'ID последней новости: {last_feed_id}')

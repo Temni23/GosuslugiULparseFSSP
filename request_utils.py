@@ -4,6 +4,7 @@ import random
 
 import requests
 
+from getters import get_last_feed_data
 from settings import (URL, SEARCH_SENDER, RE_REQUESTS_SERVER,
                       REQUEST_SLEEP_TIME)
 
@@ -14,12 +15,15 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
     result = []
     for doc_id in docs_id:
         document_url = URL + doc_id
-        sleep(random.uniform(0,2))
+        sleep(random.uniform(0, 2))
         incoming_document_request = request_to_server(url=document_url,
                                                       headers=headers)
         if incoming_document_request.status_code != 200:
-            raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
-                            f'{incoming_document_request.status_code}')
+            print(f'Документ {doc_id} не загружен, ответ сервера '
+                  f'{incoming_document_request.status_code} '
+                  f'Проверка не завершена в полном объеме, попробуйте '
+                  f'перезапустить используя данные последней новости')
+            return result
         incoming_document_json = incoming_document_request.json()
         result.append(incoming_document_json)
         print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
@@ -57,14 +61,12 @@ def get_feeds(url_feed: str, headers: dict, date_end_check: str,
     print(f'Работаю, собрано {len(result)} новостей')
     more_feeds = feed_request.json().get('hasMore')
     last_feed = feeds.pop()
-    last_feed_date = last_feed.get('date')
-    last_feed_id = last_feed.get('id')
+    last_feed_date, last_feed_id = get_last_feed_data(last_feed)
     if more_feeds and last_feed_date > date_end_check:
-        last_feed_in_json = last_feed_date[:-5] + '%2B0300'
-        sleep(random.uniform(0,2))
+        sleep(random.uniform(0, 2))
         get_feeds(url_feed=URL, headers=headers,
                   date_end_check=date_end_check,
-                  last_feed_date=last_feed_in_json,
+                  last_feed_date=last_feed_date,
                   last_feed_id=last_feed_id, result=result,
                   type_feed=type_feed)
 
