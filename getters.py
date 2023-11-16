@@ -16,3 +16,15 @@ def get_date_with_offset(delta):
                                          microsecond=0)
 
     return formatted_date.strftime('%Y-%m-%dT%H:%M:%S.000') + '%2B0300'
+
+
+def get_last_params() -> tuple:
+    answer = input('Желаете ли вы ввести данные предыдущей проверки для '
+                   'продолжения (Y/n):')
+    if answer.lower()[0] != 'y':
+        return '', ''
+    last_feed_date = input('Введите дату последней новости в предыдущей '
+                           'проверке:')
+    last_feed_id = input('Введите id последней новости в предыдущей '
+                         'проверке:')
+    return last_feed_date, last_feed_id

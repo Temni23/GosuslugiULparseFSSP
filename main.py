@@ -1,6 +1,6 @@
 from excel_utils import save_incoming_vip_to_excel
 from request_utils import get_feeds, check_feeds, get_incoming_document
-from getters import get_cookie, get_date_with_offset
+from getters import get_cookie, get_date_with_offset, get_last_params
 from settings import URL, TYPE_FEED
 
 
@@ -9,7 +9,8 @@ if __name__ == '__main__':
     end_date = get_date_with_offset(
         int(input('Введите период для проверки: ')))
     headers = {'Cookie': cookie}
-    feeds = get_feeds(URL, type_feed=TYPE_FEED, cookie=cookie,
+    last_feed_date, last_feed_id = get_last_params()
+    feeds = get_feeds(URL, type_feed=TYPE_FEED, headers=headers,
                       date_end_check=end_date)
     print(f'Новости получены, проверяю... Всего '
           f'{len(feeds)} новостей для проверки. Ищу нужные...')
