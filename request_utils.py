@@ -44,31 +44,29 @@ def check_feeds(data: List[dict]) -> list:
 
 
 def get_feeds(url_feed: str, headers: dict, date_end_check: str,
-              last_feed_date='', type_feed='', last_feed_id='',
-              result=[]) -> list:
+              last_feed_date='', type_feed='', last_feed_id='') -> list:
     """Получает входящие уведомления, список словарей, сформированных из
     json входящих уведомлений."""
 
-    url = url_feed + (
-        f'?unread=false&isArchive=false&isHide=false&types='
-        f'{type_feed}&pageSize=20&lastFeedId={last_feed_id}'
-        f'&lastFeedDate={last_feed_date}')
+    result = []
 
-    feed_request = request_to_server(url, headers)
+    while True:
+        url = url_feed + (
+            f'?unread=false&isArchive=false&isHide=false&types='
+            f'{type_feed}&pageSize=20&lastFeedId={last_feed_id}'
+            f'&lastFeedDate={last_feed_date}')
 
-    feeds = feed_request.json().get('items')
-    result.extend(feeds)
-    print(f'Работаю, собрано {len(result)} новостей')
-    more_feeds = feed_request.json().get('hasMore')
-    last_feed = feeds.pop()
-    last_feed_date, last_feed_id = get_last_feed_data(last_feed)
-    if more_feeds and last_feed_date > date_end_check:
+        feed_request = request_to_server(url, headers)
+
+        feeds = feed_request.json().get('items')
+        result.extend(feeds)
+        print(f'Работаю, собрано {len(result)} новостей')
+        more_feeds = feed_request.json().get('hasMore')
+        last_feed = feeds.pop()
+        last_feed_date, last_feed_id = get_last_feed_data(last_feed)
+        if not more_feeds or last_feed_date <= date_end_check:
+            break
         sleep(random.uniform(0, 2))
-        get_feeds(url_feed=URL, headers=headers,
-                  date_end_check=date_end_check,
-                  last_feed_date=last_feed_date,
-                  last_feed_id=last_feed_id, result=result,
-                  type_feed=type_feed)
 
     return result
 
