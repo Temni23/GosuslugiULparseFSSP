@@ -27,5 +27,5 @@ if __name__ == '__main__':
     last = feeds.pop()
     last_feed_date, last_feed_id = get_last_feed_data(last)
     print(f'Данные для продолжения проверки:\n'
-          f'Дата последней новости: {last_feed_date}'
+          f'Дата последней новости: {last_feed_date}\n'
           f'ID последней новости: {last_feed_id}')

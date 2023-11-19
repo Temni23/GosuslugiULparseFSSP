@@ -46,6 +46,7 @@ def save_incoming_vip_to_excel(data_list: List[dict],
                                                 id_organ_name, id_date,
                                                 delo_num)
             send_email_to_user(EMAIL_TARGET, text_for_email)
+            # TODO добавить ID возбуждения дату и ссылку на постановление
 
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
