@@ -1,3 +1,7 @@
+"""
+Модуль содержит функции работающие с экселем.
+"""
+
 from typing import List
 
 import pandas as pd
@@ -8,6 +12,7 @@ from settings import TRIGGER_TO_EMAIL, EMAIL_TARGETS
 
 def save_incoming_vip_to_excel(data_list: List[dict],
                                excel_filename: str) -> None:
+    """Сохраняет в эксель информацию о возбуждении ИП."""
     # Пытаемся загрузить существующий файл Excel, если он существует
     try:
         existing_data = pd.read_excel(excel_filename)

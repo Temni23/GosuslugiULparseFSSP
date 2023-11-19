@@ -1,10 +1,13 @@
+"""
+Функции для сохранения постановлений в формате PDF.
+"""
 import datetime
 import os.path
 
 import requests
 
 from email_utils import send_vip_to_user
-from settings import SEND_EMAIL, EMAIL_TARGET, RE_REQUESTS_DOWNLOAD
+from settings import SEND_EMAIL, EMAIL_TARGETS, RE_REQUESTS_DOWNLOAD
 
 
 def save_downloaded_pdf(file, file_id):
@@ -29,7 +32,7 @@ def download_pdf(attachments: list, headers: dict, request_count=1):
             if file_request.status_code == 200:
                 save_downloaded_pdf(file_request.content, file_id)
                 if SEND_EMAIL:
-                    send_vip_to_user(file_request.content, EMAIL_TARGET)
+                    send_vip_to_user(file_request.content, EMAIL_TARGETS[0])
             elif request_count < RE_REQUESTS_DOWNLOAD:
                 request_count += 1
                 print(

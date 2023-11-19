@@ -1,3 +1,6 @@
+"""
+Содержит функции для работы с сервером ГУ и обработкой полученных ответов.
+"""
 from time import sleep
 from typing import List
 import random
