@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 
 from email_utils import get_text_for_email, send_email_to_user
-from settings import TRIGGER_TO_EMAIL, EMAIL_TARGET
+from settings import TRIGGER_TO_EMAIL, EMAIL_TARGETS
 
 
 def save_incoming_vip_to_excel(data_list: List[dict],
@@ -45,8 +45,9 @@ def save_incoming_vip_to_excel(data_list: List[dict],
                                                 number_doc,
                                                 id_organ_name, id_date,
                                                 delo_num, date_doc)
-            send_email_to_user(EMAIL_TARGET, text_for_email)
-            # TODO добавить ID возбуждения дату и ссылку на постановление
+            for email in EMAIL_TARGETS:
+                send_email_to_user(email, text_for_email)
+                # TODO добавить ID возбуждения дату и ссылку на постановление
 
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
