@@ -68,12 +68,13 @@ def sending_email(email, password, target_email, msg):
 
 
 def get_text_for_email(dbtr_name, supplier_org_name, number_doc,
-                       id_organ_name, id_date, delo_num) -> str:
+                       id_organ_name, id_date, delo_num, date_doc) -> str:
     text = (f'При проверке личного кабинета Госуслуг обнаружено '
-            f'исполнительное производств в отношении {dbtr_name}.\n'
-            f'Возбуждено в {supplier_org_name}\n'
-            f'На основании исполнительного документа {number_doc}\n'
-            f'Вынесенного органом {id_organ_name} {id_date}\n'
-            f'Номер исполнительного производства {delo_num}\n'
-            f'Сообщите об этом письме юристу!')
+            f'исполнительное производств в отношении {dbtr_name}.<br>'
+            f'Возбуждено в {supplier_org_name}<br>'
+            f'На основании исполнительного документа {number_doc}<br>'
+            f'Вынесенного органом <b>{id_organ_name} {id_date}</b><br>'
+            f'Номер исполнительного производства <b>{delo_num} от '
+            f'{date_doc}</b><br>'
+            f'<b>Сообщите об этом письме юристу!</b>')
     return text

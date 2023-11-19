@@ -44,7 +44,7 @@ def save_incoming_vip_to_excel(data_list: List[dict],
             text_for_email = get_text_for_email(dbtr_name, supplier_org_name,
                                                 number_doc,
                                                 id_organ_name, id_date,
-                                                delo_num)
+                                                delo_num, date_doc)
             send_email_to_user(EMAIL_TARGET, text_for_email)
             # TODO добавить ID возбуждения дату и ссылку на постановление
 
