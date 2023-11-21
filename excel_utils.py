@@ -25,6 +25,7 @@ def save_incoming_vip_to_excel(data_list: List[dict],
 
     for item in data_list:
         # Извлекаем нужные значения из словаря item
+        message_id = item.get('id')
         doc_reg_date = item.get('detail').get('addParams').get('DocRegDate')
         dbtr_name = item.get('detail').get('addParams').get('DbtrName')
         idoc_subj_exec_name = item.get('detail').get('addParams').get(
@@ -56,6 +57,7 @@ def save_incoming_vip_to_excel(data_list: List[dict],
 
         # Создаем временный DataFrame с полученными значениями
         temp_df = pd.DataFrame({
+            'Номер уведомления ГУ': [message_id],
             'Дата регистрации документа': [doc_reg_date],
             'Должник': [dbtr_name],
             'Взыскатель': [crdr_name],

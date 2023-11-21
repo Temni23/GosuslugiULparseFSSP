@@ -59,7 +59,7 @@ def send_email_to_user(recipient_email: str, text_for_email: str) -> None:
 
 
 def sending_email(email: str, password: str,
-                  target_email: str, msg: str) -> None:
+                  target_email: str, msg: MIMEMultipart) -> None:
     """Отправляет сообщение на электронную почту пользователя."""
     mailserver = smtplib.SMTP('smtp.yandex.ru', 587)
     mailserver.ehlo()
