@@ -1,3 +1,8 @@
+"""
+Вспомогательные функции для работы с пользователем и получаемой от сервера
+информацией.
+"""
+
 import datetime
 
 
@@ -27,4 +32,11 @@ def get_last_params() -> tuple:
                            'проверке:')
     last_feed_id = input('Введите id последней новости в предыдущей '
                          'проверке:')
+    return last_feed_date, last_feed_id
+
+
+def get_last_feed_data(data:dict) -> tuple:
+    last_feed_date = data.get('date')
+    last_feed_date = last_feed_date[:-5] + '%2B0300'
+    last_feed_id = data.get('id')
     return last_feed_date, last_feed_id

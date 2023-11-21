@@ -1,3 +1,6 @@
+"""
+Содержит функции для работы с электронной почтой.
+"""
 import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -7,7 +10,7 @@ from settings import APP_EMAIL, APP_EMAIL_PASSWORD, TRIGGER_TO_EMAIL
 
 
 def send_vip_to_user(file: bytes, recipient_email: str) -> None:
-    """Функция используется для отправки письма с файлом пользователю."""
+    """Отправляет письма с файлом пользователю."""
     email = APP_EMAIL
     password = APP_EMAIL_PASSWORD
     target_email = recipient_email
@@ -55,7 +58,9 @@ def send_email_to_user(recipient_email: str, text_for_email: str) -> None:
         print(f'Ошибка: Невозможно отправить сообщение - {str(e)}')
 
 
-def sending_email(email, password, target_email, msg):
+def sending_email(email: str, password: str,
+                  target_email: str, msg: MIMEMultipart) -> None:
+    """Отправляет сообщение на электронную почту пользователя."""
     mailserver = smtplib.SMTP('smtp.yandex.ru', 587)
     mailserver.ehlo()
     mailserver.starttls()
@@ -67,13 +72,15 @@ def sending_email(email, password, target_email, msg):
     mailserver.quit()
 
 
-def get_text_for_email(dbtr_name, supplier_org_name, number_doc,
-                       id_organ_name, id_date, delo_num) -> str:
-    text = (f'При проверке личного кабинета Госуслуг обнаружено '
-            f'исполнительное производств в отношении {dbtr_name}.\n'
-            f'Возбуждено в {supplier_org_name}\n'
-            f'На основании исполнительного документа {number_doc}\n'
-            f'Вынесенного органом {id_organ_name} {id_date}\n'
-            f'Номер исполнительного производства {delo_num}\n'
-            f'Сообщите об этом письме юристу!')
-    return text
+def get_text_for_email(dbtr_name: str, supplier_org_name: str, number_doc: str,
+                       id_organ_name: str, id_date: str, delo_num: str,
+                       date_doc: str) -> str:
+    """Возвращает текст для электронного письма пользователю"""
+    return (f'При проверке личного кабинета Госуслуг обнаружено '
+            f'исполнительное производств в отношении {dbtr_name}.<br>'
+            f'Возбуждено в {supplier_org_name}<br>'
+            f'На основании исполнительного документа {number_doc}<br>'
+            f'Вынесенного органом <b>{id_organ_name} {id_date}</b><br>'
+            f'Номер исполнительного производства <b>{delo_num} от '
+            f'{date_doc}</b><br>'
+            f'<b>Сообщите об этом письме юристу!</b>')

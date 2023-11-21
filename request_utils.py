@@ -1,9 +1,13 @@
+"""
+Содержит функции для работы с сервером ГУ и обработкой полученных ответов.
+"""
 from time import sleep
 from typing import List
 import random
 
 import requests
 
+from getters import get_last_feed_data
 from settings import (URL, SEARCH_SENDER, RE_REQUESTS_SERVER,
                       REQUEST_SLEEP_TIME)
 
@@ -14,12 +18,15 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
     result = []
     for doc_id in docs_id:
         document_url = URL + doc_id
-        sleep(random.uniform(0,2))
+        sleep(random.uniform(0, 2))
         incoming_document_request = request_to_server(url=document_url,
                                                       headers=headers)
         if incoming_document_request.status_code != 200:
-            raise Exception(f'Документ {doc_id} не загружен, ответ сервера '
-                            f'{incoming_document_request.status_code}')
+            print(f'Документ {doc_id} не загружен, ответ сервера '
+                  f'{incoming_document_request.status_code} '
+                  f'Проверка не завершена в полном объеме, попробуйте '
+                  f'перезапустить используя данные последней новости')
+            return result
         incoming_document_json = incoming_document_request.json()
         result.append(incoming_document_json)
         print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
@@ -40,33 +47,29 @@ def check_feeds(data: List[dict]) -> list:
 
 
 def get_feeds(url_feed: str, headers: dict, date_end_check: str,
-              last_feed_date='', type_feed='', last_feed_id='',
-              result=[]) -> list:
+              last_feed_date='', type_feed='', last_feed_id='') -> list:
     """Получает входящие уведомления, список словарей, сформированных из
     json входящих уведомлений."""
 
-    url = url_feed + (
-        f'?unread=false&isArchive=false&isHide=false&types='
-        f'{type_feed}&pageSize=20&lastFeedId={last_feed_id}'
-        f'&lastFeedDate={last_feed_date}')
+    result = []
 
-    feed_request = request_to_server(url, headers)
+    while True:
+        url = url_feed + (
+            f'?unread=false&isArchive=false&isHide=false&types='
+            f'{type_feed}&pageSize=20&lastFeedId={last_feed_id}'
+            f'&lastFeedDate={last_feed_date}')
 
-    feeds = feed_request.json().get('items')
-    result.extend(feeds)
-    print(f'Работаю, собрано {len(result)} новостей')
-    more_feeds = feed_request.json().get('hasMore')
-    last_feed = feeds.pop()
-    last_feed_date = last_feed.get('date')
-    last_feed_id = last_feed.get('id')
-    if more_feeds and last_feed_date > date_end_check:
-        last_feed_in_json = last_feed_date[:-5] + '%2B0300'
-        sleep(random.uniform(0,2))
-        get_feeds(url_feed=URL, headers=headers,
-                  date_end_check=date_end_check,
-                  last_feed_date=last_feed_in_json,
-                  last_feed_id=last_feed_id, result=result,
-                  type_feed=type_feed)
+        feed_request = request_to_server(url, headers)
+
+        feeds = feed_request.json().get('items')
+        result.extend(feeds)
+        print(f'Работаю, собрано {len(result)} новостей')
+        more_feeds = feed_request.json().get('hasMore')
+        last_feed = feeds.pop()
+        last_feed_date, last_feed_id = get_last_feed_data(last_feed)
+        if not more_feeds or last_feed_date <= date_end_check:
+            break
+        sleep(random.uniform(0, 2))
 
     return result
 

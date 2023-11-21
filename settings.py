@@ -33,10 +33,12 @@ APP_EMAIL = os.getenv('APP_EMAIL')
 
 APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 
-EMAIL_TARGET = os.getenv('EMAIL_TARGET')
+EMAIL_TARGETS = os.getenv('EMAIL_TARGET').split(' ')
 
 SEND_EMAIL = True
 
 TRIGGER_TO_EMAIL = 'росттех'
 
 REQUEST_SLEEP_TIME = 5
+
+EXCEL_FILE_PATH = 'excel/base.xlsx'
