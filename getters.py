@@ -4,6 +4,7 @@
 """
 
 import datetime
+from typing import List
 
 
 def get_cookie() -> str:
@@ -40,3 +41,13 @@ def get_last_feed_data(data:dict) -> tuple:
     last_feed_date = last_feed_date[:-5] + '%2B0300'
     last_feed_id = data.get('id')
     return last_feed_date, last_feed_id
+
+
+def get_attachments_url(attachments: List[dict]):
+    for attachment in attachments:
+        if 'pdf' in attachment.get('fileName'):
+            file_id = attachment.get('attachmentId')
+            file_link = (f'https://www.gosuslugi.ru/api/lk/geps/file'
+                         f'/download/{file_id}?inline=false')
+            return file_link
+    return 'link not found'
