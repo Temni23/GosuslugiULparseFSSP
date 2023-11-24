@@ -29,7 +29,7 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
             return result
         incoming_document_json = incoming_document_request.json()
         result.append(incoming_document_json)
-        print(f'Собрано {len(result)} уведомлений о Возбуждении ИП')
+        print(f'Собрано {len(result)} уведомлений от Портала Госуслуги')
 
     return result
 
