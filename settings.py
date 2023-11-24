@@ -23,7 +23,9 @@ SEARCH_SENDER = 'фссп россии'
 # Используется для поиска слова в названии уведомления
 SEARCH_WORD = 'возбужден'
 
-# Используется для поиска конкретного должника в уведомлениях от ФССП
+TRIGGER_TO_EMAIL = 'росттех'
+# имя должника при выявлении которого отправляется электронное письмо
+
 SEARCH_DEBTOR = ' '
 
 RE_REQUESTS_SERVER = 20
@@ -36,8 +38,6 @@ APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 EMAIL_TARGETS = os.getenv('EMAIL_TARGET').split(' ')
 
 SEND_EMAIL = True
-
-TRIGGER_TO_EMAIL = 'росттех'
 
 REQUEST_SLEEP_TIME = 5
 
