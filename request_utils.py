@@ -65,7 +65,11 @@ def get_feeds(url_feed: str, headers: dict, date_end_check: str,
         result.extend(feeds)
         print(f'Работаю, собрано {len(result)} новостей')
         more_feeds = feed_request.json().get('hasMore')
-        last_feed = feeds.pop()
+        try:
+            last_feed = feeds.pop()
+        except Exception:
+            print(feeds)
+            raise Exception('Ошибка при получении последней новости')
         last_feed_date, last_feed_id = get_last_feed_data(last_feed)
         if not more_feeds or last_feed_date <= date_end_check:
             break
