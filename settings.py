@@ -18,7 +18,7 @@ URL = 'https://www.gosuslugi.ru/api/lk/v1/feeds/'
 TYPE_FEED = 'GEPS'
 
 # Используется для фильтрации по отправителю
-SEARCH_SENDER = 'фссп россии'
+SEARCH_SENDER = 'фссп'
 
 # Используется для поиска слова в названии уведомления
 SEARCH_WORD = 'возбужден'
