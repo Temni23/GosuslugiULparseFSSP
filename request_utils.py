@@ -69,7 +69,7 @@ def get_feeds(url_feed: str, headers: dict, date_end_check: str,
         feeds = feed_request.json().get('items')
         result.extend(feeds)
         print(f'Работаю, собрано {len(result)} новостей')
-        more_feeds = feed_request.json().get('hasMore')
+        # more_feeds = feed_request.json().get('hasMore')
         try:
             last_feed = feeds.pop()
         except Exception:
@@ -78,7 +78,8 @@ def get_feeds(url_feed: str, headers: dict, date_end_check: str,
         if not last_feed:
             break
         last_feed_date, last_feed_id = get_last_feed_data(last_feed)
-        if not more_feeds or last_feed_date <= date_end_check:
+        # if not more_feeds or last_feed_date <= date_end_check:
+        if last_feed_date <= date_end_check:
             break
         sleep(random.uniform(0, 2))
 
