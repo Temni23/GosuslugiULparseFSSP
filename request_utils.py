@@ -42,12 +42,13 @@ def check_feeds(data: List[dict]) -> list:
     for element in data:
         sender_name = element.get('title')
         # if sender_name.lower() == SEARCH_SENDER:
-        if sender_name.lower():
+        if SEARCH_SENDER in sender_name.lower():
             feed_id = str(element.get('id'))
             target_feeds_id.append(feed_id)
             if sender_name not in senders:
                 senders.append(sender_name)
-    print(senders)
+    print(f' Новости проверены, найдено отправители {senders}.'
+          f'Выбраны входящие от {SEARCH_SENDER}')
     return target_feeds_id
 
 
@@ -93,19 +94,17 @@ def request_to_server(url: str, headers: dict):
             response = requests.get(url=url, headers=headers)
             if response and response.status_code == 200:
                 return response
+            if response.status_code in [401, 404]:
+                print(f'Status code {response.status_code} url = {url}')
+                return False
         except (requests.exceptions.RequestException, ConnectionError) as e:
             print(f'Error during request to server: {e}')
+            return False
+
         sleep(REQUEST_SLEEP_TIME)
         print(f'Retry request attempt #{retry + 1}')
 
-        if response and response.status_code in [401]:
-            print(f'Status code {response.status_code} url = {url}')
-            return False
-
-    if response and response.status_code in [404]:
-        print(f'Status code {response.status_code} url = {url}')
-        return False
-    elif response is not None:
+    if response is not None:
         raise Exception(
             f'Failed to retrieve information from the server. '
             f'Last status code: {response.status_code}')
