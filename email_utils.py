@@ -84,3 +84,34 @@ def get_text_for_email(dbtr_name: str, supplier_org_name: str, number_doc: str,
             f'Номер исполнительного производства <b>{delo_num} от '
             f'{date_doc}</b><br>'
             f'<b>Сообщите об этом письме юристу!</b>')
+
+
+def send_esp(file_path: str, recipient_email: str) -> None:
+    """Отправляет письма с файлом ESP пользователю."""
+    email = APP_EMAIL
+    password = APP_EMAIL_PASSWORD
+    target_email = recipient_email
+
+    msg = MIMEMultipart()
+    msg['From'] = email
+    msg['To'] = target_email
+    msg['Subject'] = f'Автоматическое внесение электронных судебных приказов'
+    text_for_email = (f'Прошу внести информацию об электронных судебных '
+                      f'приказах, файл во вложении.')
+    msg.attach(MIMEText(text_for_email, 'html'))
+
+    try:
+        with open(file_path, 'rb') as f:
+            file_to_email = f.read()
+        attachment = MIMEApplication(file_to_email, Name=file_path)
+        attachment['Content-Disposition'] = f'attachment; filename={file_path}'
+        msg.attach(attachment)
+
+        sending_email(email, password, target_email, msg)
+        print(f'Письмо успешно отправлено')
+    except smtplib.SMTPException as e:
+        print(f'Ошибка: Невозможно отправить сообщение - {str(e)}')
+    except FileNotFoundError:
+        print(f'Ошибка: Файл {file_path} не найден')
+    except IOError as e:
+        print(f'Ошибка при чтении файла {file_path} - {str(e)}')
