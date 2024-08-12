@@ -12,7 +12,7 @@ def get_cookie() -> str:
     return cookie
 
 
-def get_date_with_offset(delta):
+def get_date_with_offset(delta: int) -> str:
     """Возвращает дату в формате необходимом для установки в качестве
     параметра url запроса."""
     current_date = datetime.datetime.now()
