@@ -56,7 +56,8 @@ def get_attachments_url(attachments: List[dict]):
 def get_inn(data: dict) -> str:
     uls_str = ' '.join(data.keys())
     ul = input(
-        f'Выберете юридическое лицо из приведенного перечня: {uls_str}')
+        f'Выберете юридическое лицо из приведенного перечня \n {uls_str} '
+        f'ВВЕДИТЕ ОТВЕТ:  ')
     try:
         return data[ul]
     except KeyError:
