@@ -3,11 +3,12 @@ from email_utils import send_esp
 from excel_utils import save_messages_to_excel, search_esp_in_messages
 from request_utils import get_feeds, check_feeds, get_incoming_document
 from getters import (get_cookie, get_date_with_offset, get_last_params,
-                     get_last_feed_data)
-from settings import URL, TYPE_FEED, EMAI_ESP, EXCEL_MESSAGES_FILE_PATH, \
-    SEND_ESP
+                     get_last_feed_data, get_inn)
+from settings import (URL, TYPE_FEED, EMAI_ESP, EXCEL_MESSAGES_FILE_PATH,
+                      SEND_ESP, ULS_DICT)
 
 if __name__ == '__main__':
+    inn = get_inn(ULS_DICT)
     cookie = get_cookie()
     days = int(input('Введите период для проверки: '))
     end_date = get_date_with_offset(days)
@@ -25,7 +26,7 @@ if __name__ == '__main__':
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
         incoming_docs = get_incoming_document(targets_feeds, headers)
         # save_incoming_vip_to_excel(incoming_docs, EXCEL_FILE_PATH)
-        save_messages_to_excel(incoming_docs, EXCEL_MESSAGES_FILE_PATH)
+        save_messages_to_excel(incoming_docs, inn, EXCEL_MESSAGES_FILE_PATH)
         print('Загрузка закончена')
         # Ищем и сохраняем информацию об электронных судебных приказах
         esp = search_esp_in_messages(EXCEL_MESSAGES_FILE_PATH, end_date)

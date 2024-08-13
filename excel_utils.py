@@ -86,7 +86,7 @@ def save_incoming_vip_to_excel(data_list: List[dict],
     combined_data.to_excel(excel_filename, index=False)
 
 
-def save_messages_to_excel(data_list: List[dict], excel_filename: str) -> None:
+def save_messages_to_excel(data_list: List[dict], inn: str, excel_filename: str) -> None:
     try:
         existing_data = pd.read_excel(excel_filename)
     except FileNotFoundError:
@@ -129,6 +129,15 @@ def save_messages_to_excel(data_list: List[dict], excel_filename: str) -> None:
             SPIShortName = message.get('addParams', {}).get('SPIShortName')
             DateDoc = message.get('addParams', {}).get('DateDoc')
 
+            if DbtrName and TRIGGER_TO_EMAIL.lower() in DbtrName.lower():
+                text_for_email = get_text_for_email(DbtrName,
+                                                    SupplierOrgName,
+                                                    NumberDoc,
+                                                    IDOrganName, IDDate,
+                                                    DeloNum, DateDoc)
+                for email in EMAIL_TARGETS:
+                    send_email_to_user(email, text_for_email)
+
             temp_df = pd.DataFrame({
                 'send_date': [send_date],
                 'thread_id': [thread_id],
@@ -156,6 +165,7 @@ def save_messages_to_excel(data_list: List[dict], excel_filename: str) -> None:
                 'DocName': [DocName],
                 'SPIShortName': [SPIShortName],
                 'DateDoc': [DateDoc],
+                'INN': [inn]
             })
 
             new_data = pd.concat([new_data, temp_df], ignore_index=True)

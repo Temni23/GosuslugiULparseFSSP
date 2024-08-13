@@ -36,7 +36,7 @@ def get_last_params() -> tuple:
     return last_feed_date, last_feed_id
 
 
-def get_last_feed_data(data:dict) -> tuple:
+def get_last_feed_data(data: dict) -> tuple:
     last_feed_date = data.get('date')
     last_feed_date = last_feed_date[:-5] + '%2B0300'
     last_feed_id = data.get('id')
@@ -51,3 +51,15 @@ def get_attachments_url(attachments: List[dict]):
                          f'/download/{file_id}?inline=false')
             return file_link
     return 'link not found'
+
+
+def get_inn(data: dict) -> str:
+    uls_str = ' '.join(data.keys())
+    ul = input(
+        f'Выберете юридическое лицо из приведенного перечня: {uls_str}')
+    try:
+        return data[ul]
+    except KeyError:
+        raise KeyError(f'Юридическое лицо {ul} не найдено в списке')
+    except Exception as error:
+        raise Exception(f"Произошла ошибка: {error}")

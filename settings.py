@@ -45,3 +45,7 @@ REQUEST_SLEEP_TIME = 5
 EXCEL_FILE_PATH = 'excel/base.xlsx'
 EXCEL_MESSAGES_FILE_PATH = 'excel/messages.xlsx'
 EMAI_ESP = os.getenv('EMAI_ESP')
+# Юрлица которые пользуются программой
+ULS = os.getenv('ULS').split(' ')
+INNS = os.getenv('INNS').split(' ')
+ULS_DICT = dict(zip(ULS, INNS))
