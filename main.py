@@ -1,4 +1,3 @@
-from beep import play_sound
 from email_utils import send_esp
 from excel_utils import save_messages_to_excel, search_esp_in_messages
 from request_utils import get_feeds, check_feeds, get_incoming_document
