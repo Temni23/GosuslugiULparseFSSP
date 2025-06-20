@@ -18,7 +18,7 @@ URL = 'https://www.gosuslugi.ru/api/lk/v1/feeds/'
 TYPE_FEED = 'GEPS'
 
 # Используется для фильтрации по отправителю
-SEARCH_SENDER = 'фссп россии'
+SEARCH_SENDER = 'фссп'
 
 # Используется для поиска слова в названии уведомления
 SEARCH_WORD = 'возбужден'
@@ -38,8 +38,14 @@ APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 EMAIL_TARGETS = os.getenv('EMAIL_TARGET').split(' ')
 
 SEND_EMAIL = True
+SEND_ESP = False
 
 REQUEST_SLEEP_TIME = 5
 
 EXCEL_FILE_PATH = 'excel/base.xlsx'
 EXCEL_MESSAGES_FILE_PATH = 'excel/messages.xlsx'
+EMAI_ESP = os.getenv('EMAI_ESP')
+# Юрлица которые пользуются программой
+ULS = os.getenv('ULS').split(' ')
+INNS = os.getenv('INNS').split(' ')
+ULS_DICT = dict(zip(ULS, INNS))
