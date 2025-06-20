@@ -38,7 +38,7 @@ APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 EMAIL_TARGETS = os.getenv('EMAIL_TARGET').split(' ')
 
 SEND_EMAIL = True
-SEND_ESP = True
+SEND_ESP = False
 
 REQUEST_SLEEP_TIME = 5
 
