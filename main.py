@@ -1,13 +1,19 @@
 from email_utils import send_esp
 from excel_utils import save_messages_to_excel, search_esp_in_messages
-from request_utils import get_feeds, check_feeds, get_incoming_document
 from getters import (get_cookie, get_date_with_offset, get_last_params,
                      get_last_feed_data, get_inn)
+from request_utils import get_feeds, check_feeds, get_incoming_document
 from settings import (URL, TYPE_FEED, EMAI_ESP, EXCEL_MESSAGES_FILE_PATH,
-                      SEND_ESP, ULS_DICT)
+                      SEND_ESP, MANY_ULS, INN, ULS_DICT)
 
 if __name__ == '__main__':
-    inn = get_inn(ULS_DICT)
+    print('Вас приветствует GosuslugiULparseFSSP \n'
+          'Коммерческое использование возможно с согласия разработчика \n'
+          'https://github.com/Temni23/GosuslugiULparseFSSP.git\n')
+    if MANY_ULS:
+        inn = get_inn(ULS_DICT)
+    else:
+        inn = INN
     cookie = get_cookie()
     days = int(input('Введите период для проверки: '))
     end_date = get_date_with_offset(days)
@@ -38,4 +44,3 @@ if __name__ == '__main__':
           f'Дней проверено: {days}\n'
           f'Дата последней новости: {last_feed_date}\n'
           f'ID последней новости: {last_feed_id}')
-    play_sound()

@@ -35,7 +35,7 @@ APP_EMAIL = os.getenv('APP_EMAIL')
 
 APP_EMAIL_PASSWORD = os.getenv('APP_EMAIL_PASSWORD')
 
-EMAIL_TARGETS = os.getenv('EMAIL_TARGET').split(' ')
+EMAIL_TARGETS = os.getenv('EMAIL_TARGETS').split(' ')
 
 SEND_EMAIL = True
 SEND_ESP = False
@@ -45,7 +45,12 @@ REQUEST_SLEEP_TIME = 5
 EXCEL_FILE_PATH = 'excel/base.xlsx'
 EXCEL_MESSAGES_FILE_PATH = 'excel/messages.xlsx'
 EMAI_ESP = os.getenv('EMAI_ESP')
-# Юрлица которые пользуются программой
-ULS = os.getenv('ULS').split(' ')
-INNS = os.getenv('INNS').split(' ')
-ULS_DICT = dict(zip(ULS, INNS))
+# Использование несколькими юлицами
+MANY_ULS = False
+ULS_DICT = {}
+if MANY_ULS:
+    ULS = os.getenv('ULS').split(' ')
+    INNS = os.getenv('INNS').split(' ')
+    # Юрлица которые пользуются программой
+    ULS_DICT = dict(zip(ULS, INNS))
+INN = os.getenv('INN')
