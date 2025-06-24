@@ -30,7 +30,6 @@ if __name__ == '__main__':
         print(f'Найдены уведомления по заданным параметрам, '
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
         incoming_docs = get_incoming_document(targets_feeds, headers)
-        # save_incoming_vip_to_excel(incoming_docs, EXCEL_FILE_PATH)
         save_messages_to_excel(incoming_docs, inn, EXCEL_MESSAGES_FILE_PATH)
         print('Загрузка закончена')
         # Ищем и сохраняем информацию об электронных судебных приказах
