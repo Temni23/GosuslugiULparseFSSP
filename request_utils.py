@@ -41,6 +41,7 @@ def check_feeds(data: List[dict]) -> list:
             target_feeds_id.append(feed_id)
             if sender_name not in senders:
                 senders.append(sender_name)
+
     print(f' Новости проверены, найдено отправители {senders}.'
           f'Выбраны входящие от {SEARCH_SENDER}')
     return target_feeds_id

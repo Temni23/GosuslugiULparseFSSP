@@ -1,10 +1,14 @@
+import pandas as pd
+
 from email_utils import send_esp
-from excel_utils import save_messages_to_excel, search_esp_in_messages
+from excel_utils import (save_messages_to_excel, process_email_notifications,
+                         search_esp_in_new_data)
 from getters import (get_cookie, get_date_with_offset, get_last_params,
                      get_last_feed_data, get_inn)
 from request_utils import get_feeds, check_feeds, get_incoming_document
 from settings import (URL, TYPE_FEED, EMAI_ESP, EXCEL_MESSAGES_FILE_PATH,
-                      SEND_ESP, MANY_ULS, INN, ULS_DICT)
+                      SEND_ESP, MANY_ULS, INN, ULS_DICT, EMAIL_TARGETS,
+                      ESP_PATH)
 
 if __name__ == '__main__':
     print('Вас приветствует GosuslugiULparseFSSP \n'
@@ -30,12 +34,15 @@ if __name__ == '__main__':
         print(f'Найдены уведомления по заданным параметрам, '
               f'всего {len(targets_feeds)}. Сейчас загружу документы')
         incoming_docs = get_incoming_document(targets_feeds, headers)
-        save_messages_to_excel(incoming_docs, inn, EXCEL_MESSAGES_FILE_PATH)
+        new_data = save_messages_to_excel(incoming_docs, inn,
+                                          EXCEL_MESSAGES_FILE_PATH)
         print('Загрузка закончена')
-        # Ищем и сохраняем информацию об электронных судебных приказах
-        esp = search_esp_in_messages(EXCEL_MESSAGES_FILE_PATH, end_date)
-        if SEND_ESP and esp:
-            send_esp(esp, EMAI_ESP)
+        if isinstance(new_data, pd.DataFrame) and not new_data.empty:
+            process_email_notifications(new_data, EMAIL_TARGETS)
+            # Ищем и сохраняем информацию об электронных судебных приказах
+            esp = search_esp_in_new_data(new_data, end_date, ESP_PATH)
+            if SEND_ESP and esp:
+                send_esp(esp, EMAI_ESP)
     print(f'Проверка до {end_date[0:10]} закончена.')
     last = feeds.pop()
     last_feed_date, last_feed_id = get_last_feed_data(last)

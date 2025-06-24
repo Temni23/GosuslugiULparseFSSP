@@ -19,14 +19,12 @@ TYPE_FEED = 'GEPS'
 
 # Используется для фильтрации по отправителю
 SEARCH_SENDER = 'фссп'
+#
+# # Используется для поиска слова в названии уведомления
+# SEARCH_WORD = 'возбужден'
 
-# Используется для поиска слова в названии уведомления
-SEARCH_WORD = 'возбужден'
-
-TRIGGER_TO_EMAIL = 'росттех'
+TRIGGER_TO_EMAIL = 'росттех' # TODO несколько тиригеров списком
 # имя должника при выявлении которого отправляется электронное письмо
-
-SEARCH_DEBTOR = ' '
 
 RE_REQUESTS_SERVER = 20
 RE_REQUESTS_DOWNLOAD = 5
@@ -44,7 +42,10 @@ REQUEST_SLEEP_TIME = 5
 
 EXCEL_FILE_PATH = 'excel/base.xlsx'
 EXCEL_MESSAGES_FILE_PATH = 'excel/messages.xlsx'
+ESP_PATH = 'excel/ESP/'
 EMAI_ESP = os.getenv('EMAI_ESP')
+
+# TODO Возможность работы с CSV
 # Использование несколькими юлицами
 MANY_ULS = False
 ULS_DICT = {}
