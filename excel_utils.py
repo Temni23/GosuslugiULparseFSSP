@@ -1,7 +1,8 @@
 """
 Модуль содержит функции работающие с экселем.
 """
-
+import os
+import shutil
 from datetime import datetime
 from typing import List
 
@@ -9,96 +10,23 @@ import pandas as pd
 
 from email_utils import get_text_for_email, send_email_to_user
 from getters import get_attachments_url
-from settings import TRIGGER_TO_EMAIL, EMAIL_TARGETS
+from settings import TRIGGER_TO_EMAIL, EMAIL_TARGETS, BACKUP_DIR
 
 
-# def save_messages_to_excel(data_list: List[dict], inn: str, excel_filename: str) -> None:
-#     try:
-#         existing_data = pd.read_excel(excel_filename)
-#     except FileNotFoundError:
-#         existing_data = pd.DataFrame()
-#
-#     new_data = pd.DataFrame()
-#
-#     for item in data_list:
-#         messages = item.get('detail', {}).get('messages', [])
-#         for message in messages:
-#             send_date = message.get('sendDate')
-#             thread_id = message.get('threadId')
-#             subject = message.get('subject')
-#             text = message.get('text')
-#             update_date = message.get('updateDate')
-#             attachments = message.get('attachments')
-#             file_link = get_attachments_url(
-#                 attachments) if attachments else None
-#             IdDocType_text = message.get('addParams', {}).get('IdDocType_text')
-#             IDocSubjExecName = message.get('addParams', {}).get(
-#                 'IDocSubjExecName')
-#             feed_mobtitle = message.get('addParams', {}).get('feed_mobtitle')
-#             NumberDoc = message.get('addParams', {}).get('NumberDoc')
-#
-#             IdDocType_feed = message.get('addParams', {}).get('IdDocType_feed')
-#             RiseDate = message.get('addParams', {}).get('RiseDate')
-#             DocRegDate = message.get('addParams', {}).get('DocRegDate')
-#             CrdrName = message.get('addParams', {}).get('CrdrName')
-#             IDNum = message.get('addParams', {}).get('IDNum')
-#             SupplierOrgName = message.get('addParams', {}).get(
-#                 'SupplierOrgName')
-#             feed_subtitle = message.get('addParams', {}).get('feed_subtitle')
-#             DebtSumTotal = message.get('addParams', {}).get('DebtSumTotal')
-#             DbtrName = message.get('addParams', {}).get('DbtrName')
-#             IDDate = message.get('addParams', {}).get('IDDate')
-#             IDOrganName = message.get('addParams', {}).get('IDOrganName')
-#             PostName = message.get('addParams', {}).get('PostName')
-#             DeloNum = message.get('addParams', {}).get('DeloNum')
-#             DocName = message.get('addParams', {}).get('DocName')
-#             SPIShortName = message.get('addParams', {}).get('SPIShortName')
-#             DateDoc = message.get('addParams', {}).get('DateDoc')
-#
-#             if DbtrName and TRIGGER_TO_EMAIL.lower() in DbtrName.lower():
-#                 text_for_email = get_text_for_email(DbtrName,
-#                                                     SupplierOrgName,
-#                                                     NumberDoc,
-#                                                     IDOrganName, IDDate,
-#                                                     DeloNum, DateDoc)
-#                 for email in EMAIL_TARGETS:
-#                     send_email_to_user(email, text_for_email)
-#
-#             temp_df = pd.DataFrame({
-#                 'send_date': [send_date],
-#                 'thread_id': [thread_id],
-#                 'subject': [subject],
-#                 'text': [text],
-#                 'update_date': [update_date],
-#                 'file_link': [file_link],
-#                 'IdDocType_text': [IdDocType_text],
-#                 'IDocSubjExecName': [IDocSubjExecName],
-#                 'feed_mobtitle': [feed_mobtitle],
-#                 'NumberDoc': [NumberDoc],
-#                 'IdDocType_feed': [IdDocType_feed],
-#                 'RiseDate': [RiseDate],
-#                 'DocRegDate': [DocRegDate],
-#                 'CrdrName': [CrdrName],
-#                 'IDNum': [IDNum],
-#                 'SupplierOrgName': [SupplierOrgName],
-#                 'feed_subtitle': [feed_subtitle],
-#                 'DebtSumTotal': [DebtSumTotal],
-#                 'DbtrName': [DbtrName],
-#                 'IDDate': [IDDate],
-#                 'IDOrganName': [IDOrganName],
-#                 'PostName': [PostName],
-#                 'DeloNum': [DeloNum],
-#                 'DocName': [DocName],
-#                 'SPIShortName': [SPIShortName],
-#                 'DateDoc': [DateDoc],
-#                 'INN': [inn]
-#             })
-#
-#             new_data = pd.concat([new_data, temp_df], ignore_index=True)
-#
-#     combined_data = pd.concat([existing_data, new_data], ignore_index=True)
-#
-#     combined_data.to_excel(excel_filename, index=False)
+def backup_file(file_path: str, backup_dir) -> str:
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Файл '{file_path}' не найден, бэкап "
+                                f"невозможен.Прерываюсь. Проверьте настройки.")
+
+    os.makedirs(backup_dir, exist_ok=True)
+    base_name = os.path.basename(file_path)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_name = f"{os.path.splitext(base_name)[0]}_{timestamp}.xlsx"
+    backup_path = os.path.join(backup_dir, backup_name)
+    shutil.copy2(file_path, backup_path)
+    return backup_path
+
+
 def extract_message_fields(message: dict, inn: str) -> dict:
     params = message.get('addParams', {})
 
@@ -156,10 +84,10 @@ def process_email_notifications(df: pd.DataFrame, email_targets: List[str]) -> N
 
 
 def save_messages_to_excel(data_list: List[dict], inn: str,
-                           excel_filename: str) -> pd.DataFrame | bool:
-    # TODO Сохранение бэкапа файла с сообщениями
+                           excel_file_path: str) -> pd.DataFrame | bool:
+    backup_file(excel_file_path, BACKUP_DIR)
     try:
-        existing_data = pd.read_excel(excel_filename)
+        existing_data = pd.read_excel(excel_file_path)
     except FileNotFoundError:
         existing_data = pd.DataFrame()
 
@@ -177,8 +105,8 @@ def save_messages_to_excel(data_list: List[dict], inn: str,
         new_data = pd.DataFrame(records)
         combined_data = pd.concat([existing_data, new_data], ignore_index=True)
         # TODO Приведение данных к единым форматам в итоговом файле
-        # TODO Дроп дубликатоов в итоговом файле
-        combined_data.to_excel(excel_filename, index=False)
+        combined_data.drop_duplicates(inplace=True)
+        combined_data.to_excel(excel_file_path, index=False)
 
         return new_data
     return False

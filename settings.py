@@ -40,8 +40,8 @@ SEND_ESP = True
 
 REQUEST_SLEEP_TIME = 5
 
-EXCEL_FILE_PATH = 'excel/base.xlsx'
 EXCEL_MESSAGES_FILE_PATH = 'excel/messages.xlsx'
+BACKUP_DIR = 'backup'
 ESP_PATH = 'excel/ESP/'
 EMAI_ESP = os.getenv('EMAI_ESP')
 
