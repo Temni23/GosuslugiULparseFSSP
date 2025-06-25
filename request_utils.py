@@ -22,11 +22,6 @@ def get_incoming_document(docs_id: list, headers: dict) -> List:
         incoming_document_request = request_to_server(url=document_url,
                                                       headers=headers)
         if incoming_document_request:
-            # print(f'Документ {doc_id} не загружен, ответ сервера '
-            #       f'{incoming_document_request.status_code} '
-            #       f'Проверка не завершена в полном объеме, попробуйте '
-            #       f'перезапустить используя данные последней новости')
-            # return result
             incoming_document_json = incoming_document_request.json()
             result.append(incoming_document_json)
             print(f'Собрано {len(result)} уведомлений от Портала Госуслуги')
@@ -41,12 +36,12 @@ def check_feeds(data: List[dict]) -> list:
     senders = []
     for element in data:
         sender_name = element.get('title')
-        # if sender_name.lower() == SEARCH_SENDER:
         if SEARCH_SENDER in sender_name.lower():
             feed_id = str(element.get('id'))
             target_feeds_id.append(feed_id)
             if sender_name not in senders:
                 senders.append(sender_name)
+
     print(f' Новости проверены, найдено отправители {senders}.'
           f'Выбраны входящие от {SEARCH_SENDER}')
     return target_feeds_id

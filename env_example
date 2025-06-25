@@ -1,7 +1,0 @@
-APP_EMAIL=example-test23@yandex.ru
-APP_EMAIL_PASSWORD=example
-EMAIL_TARGET=example@example.online example@mail.ru
-#Электронная почта для информации об электронном судебном приказе
-EMAI_ESP=example@mail.ru
-ULS='ONE TWO'
-INNS='7777777777 777777771'
